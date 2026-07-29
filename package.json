@@ -5,10 +5,10 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "node scripts/preflight.mjs && astro build",
     "preview": "wrangler dev",
     "check": "astro check",
-    "deploy": "node scripts/preflight.mjs && astro build && wrangler deploy",
+    "deploy": "npm run build && wrangler deploy",
     "cf-typegen": "wrangler types",
     "preflight": "node scripts/preflight.mjs"
   },

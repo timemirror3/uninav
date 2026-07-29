@@ -604,8 +604,20 @@ module does not exist during the prerender pass.
 landing on a cold isolate would re-send the welcome email. If that is ever
 observed, add a KV binding keyed on `event.id`.
 
-**`PUBLIC_*` variables are build-time.** Changing `PUBLIC_CAL_LINK` or
-`PUBLIC_TURNSTILE_SITE_KEY` requires a rebuild, not just a secret update.
+**`PUBLIC_*` variables are build-time — and this one bit us in production.**
+`PUBLIC_CAL_LINK` and `PUBLIC_TURNSTILE_SITE_KEY` are inlined into the HTML at
+build time, so they must exist *wherever the build runs*. `.dev.vars` is
+git-ignored, so Cloudflare Workers Builds never saw them, and the first deploy
+went out with both empty. Nothing errored: the cal.com embed quietly rendered its
+fallback panel and **every form submission 403'd** with `verification_failed`.
+
+Both now live in a **committed `.env`** (they are public values — a Turnstile
+*site* key is meant to be in the page source; only the *secret* key is not).
+`npm run build` runs `scripts/preflight.mjs` first and **exits non-zero** if
+`PUBLIC_TURNSTILE_SITE_KEY` is missing, so silently-broken forms cannot ship
+again. Deliberate forms-off deploy: `ALLOW_MISSING_TURNSTILE=1 npm run build`.
+
+Changing either value still requires a rebuild, not just a secret update.
 
 **Turnstile has a 300px minimum width.** It is scaled down under 380px via
 `.turnstile-wrap` in `global.css`; without that the form pages scroll sideways on a

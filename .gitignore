@@ -3,7 +3,11 @@ dist/
 .astro/
 .wrangler/
 .dev.vars
-.env
+
+# .env holds only build-time PUBLIC_* values and IS committed — see the file.
+# Real secrets live in .dev.vars / wrangler secrets.
+.env.local
+.env.*.local
 .env.production
 *.log
 .DS_Store
