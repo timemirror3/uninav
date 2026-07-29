@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import Turnstile from './Turnstile';
 import { newsletterSchema } from '../lib/schemas';
+import FormUnavailable from './FormUnavailable';
 
 type Status = 'idle' | 'pending' | 'success' | 'error';
 
@@ -47,6 +48,17 @@ export default function NewsletterForm({ turnstileSiteKey }: Props) {
       setToken('');
       setResetKey((n) => n + 1);
     }
+  }
+
+  if (!turnstileSiteKey) {
+    return (
+      <FormUnavailable
+        variant="inline"
+        phone="(424) 404-3686"
+        phoneHref="tel:+14244043686"
+        email="info@universitynavigator.org"
+      />
+    );
   }
 
   return (

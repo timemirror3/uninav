@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import Turnstile from './Turnstile';
 import { contactSchema, fieldErrors } from '../lib/schemas';
+import FormUnavailable from './FormUnavailable';
 
 type Status = 'idle' | 'pending' | 'success' | 'error';
 
@@ -69,6 +70,18 @@ export default function ContactForm({ turnstileSiteKey, phone, phoneHref }: Prop
     setStatus('idle');
     setErrors({});
     setResetKey((n) => n + 1);
+  }
+
+  // No site key in the build → the server will reject every submission. Say so
+  // rather than letting someone type a message into a form that cannot send.
+  if (!turnstileSiteKey) {
+    return (
+      <FormUnavailable
+        phone={phone}
+        phoneHref={phoneHref}
+        email="info@universitynavigator.org"
+      />
+    );
   }
 
   if (status === 'pending') {

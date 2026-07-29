@@ -180,33 +180,16 @@ if (warnings.length) {
 }
 
 /*
- * Hard gate.
+ * Advisory only — deliberately does NOT block the build.
  *
- * A missing PUBLIC_TURNSTILE_SITE_KEY is not a degraded state — the widget never
- * renders, no token is produced, and the server rejects 100% of submissions with
- * 403. The site looks fine and every contact form, newsletter signup and inquiry
- * silently fails. That shipped to production once; it should not be possible to
- * ship it again without saying so out loud.
+ * It used to hard-fail on a missing PUBLIC_TURNSTILE_SITE_KEY. That stopped
+ * silently-broken forms shipping, but it also blocked every unrelated fix from
+ * deploying, which was worse: a push-to-deploy pipeline just stopped deploying.
  *
- * Escape hatch for a deliberate forms-off deploy:
- *   ALLOW_MISSING_TURNSTILE=1 npm run build
+ * The forms now handle the missing key themselves — they disable and show the
+ * phone number instead of accepting submissions that would 403. So a missing key
+ * degrades one feature visibly rather than breaking the whole deploy.
  */
-const blocking = [];
-if (!siteKey && process.env['ALLOW_MISSING_TURNSTILE'] !== '1') {
-  blocking.push(
-    'PUBLIC_TURNSTILE_SITE_KEY is not set at BUILD time. Every form submission will be rejected with 403. ' +
-      'Set it in .env (it is a public value) or as a build variable in Cloudflare Workers Builds. ' +
-      'To deploy anyway: ALLOW_MISSING_TURNSTILE=1 npm run build'
-  );
-}
-
-if (blocking.length) {
-  console.log(`\n${RED}${BOLD}Build blocked (${blocking.length})${OFF}`);
-  for (const b of blocking) console.log(`  ${RED}✗${OFF} ${b}`);
-  console.log('');
-  process.exit(1);
-}
-
 console.log(
   `\n${DIM}Warnings above are advisory. Run alone with: npm run preflight${OFF}\n`
 );

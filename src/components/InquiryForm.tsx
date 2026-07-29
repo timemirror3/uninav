@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Turnstile from './Turnstile';
 import { INQUIRY_STEP_SCHEMAS, fieldErrors, inquirySchema } from '../lib/schemas';
+import FormUnavailable from './FormUnavailable';
 
 type Status = 'idle' | 'pending' | 'success' | 'error';
 
@@ -152,6 +153,16 @@ export default function InquiryForm({ turnstileSiteKey, phone, phoneHref }: Prop
       setResetKey((n) => n + 1);
       window.scrollTo({ top: 0 });
     }
+  }
+
+  if (!turnstileSiteKey) {
+    return (
+      <FormUnavailable
+        phone={phone}
+        phoneHref={phoneHref}
+        email="info@universitynavigator.org"
+      />
+    );
   }
 
   if (status === 'success') {
