@@ -34,6 +34,11 @@ export const DESTINATIONS: Destination[] = [
     info: 'Harvard University, in Cambridge, Massachusetts, is the oldest institution of higher learning in the United States.',
   },
   {
+    coord: [-118.2851, 34.0224],
+    name: 'University of Southern California',
+    info: 'A leading private research university in Los Angeles, known for business, cinematic arts, engineering, and communication — and the closest of these campuses to home.',
+  },
+  {
     coord: [-118.1253, 34.1377],
     name: 'Caltech',
     info: 'The California Institute of Technology is a world leader in science and engineering education and research, with a small yet highly prestigious community.',

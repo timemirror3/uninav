@@ -36,12 +36,18 @@ export default function CalEmbed({ calLink, phone, phoneHref, timeoutMs = 10000 
 
   const bookingUrl = `https://cal.com/${calLink}`;
   /*
-   * Point at the canonical /embed path rather than `?embed=true` on the booking
-   * page: the latter 302s to app.cal.com and drops the query string on the way,
-   * which silently lost `theme=light` and rendered a dark scheduler on a cream
-   * page. Theming rides on the URL since there is no script to configure.
+   * `?embed=true` on the booking page — NOT the /embed path.
+   *
+   * Tested all three side by side in an iframe:
+   *   /embed?theme=light      → renders blank. That route stays empty until
+   *                             cal.com's embed.js completes a postMessage
+   *                             handshake, so it cannot be used as a plain frame.
+   *   plain ?theme=light      → renders, but ignores the theme param and follows
+   *                             the visitor's system preference, so it came out
+   *                             dark on a cream page.
+   *   ?embed=true&theme=light → renders, light, no script required. This one.
    */
-  const embedUrl = `${bookingUrl}/embed?theme=light&layout=month_view&brandColor=%23560F10`;
+  const embedUrl = `${bookingUrl}?embed=true&theme=light&layout=month_view`;
 
   /*
    * No internal IntersectionObserver.
@@ -111,8 +117,18 @@ export default function CalEmbed({ calLink, phone, phoneHref, timeoutMs = 10000 
           loading="lazy"
           onLoad={() => setState('ready')}
           onError={() => setState('failed')}
-          // Only what the booking flow needs.
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+          /*
+           * No sandbox attribute.
+           *
+           * It was set to allow-scripts + allow-same-origin + forms + popups,
+           * and the embed rendered blank behind it. That combination is also
+           * security theatre for a cross-origin frame — allow-scripts together
+           * with allow-same-origin lets the frame remove its own sandbox, so it
+           * bought nothing while breaking the booking flow. The real control is
+           * the CSP frame-src allowlist in public/_headers, which permits only
+           * cal.com, app.cal.com, Turnstile and Stripe Checkout.
+           */
+          referrerPolicy="strict-origin-when-cross-origin"
         />
       </div>
     </div>
