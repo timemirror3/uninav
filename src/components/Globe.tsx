@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { geoOrthographic, geoPath, geoGraticule10, geoDistance } from 'd3-geo';
 import { feature } from 'topojson-client';
+import type { FeatureCollection, Geometry } from 'geojson';
 import type { GeoPermissibleObjects } from 'd3-geo';
 import type { Topology, GeometryCollection } from 'topojson-specification';
-import landUrl from '../assets/land-110m.json?url';
+import countriesUrl from '../assets/countries-110m.json?url';
+import { landColorFor } from '../lib/continents';
 import { DESTINATIONS, type Destination } from '../lib/destinations';
 
 interface Props {
-  landColor?: string;
   oceanColor?: string;
   spin?: boolean;
   /**
@@ -40,8 +41,7 @@ type Phase = 'pending' | 'live' | 'fallback';
  * The slotted route diagram remains the fallback for no-JS and no-canvas.
  */
 export default function Globe({
-  landColor = '#560F10',
-  oceanColor = '#A6C6D9',
+  oceanColor = '#2F6F9F',
   spin = true,
   children,
 }: Props) {
@@ -56,6 +56,14 @@ export default function Globe({
   const [hovered, setHovered] = useState<Destination | null>(null);
   // True once the intro animation has finished; gates the markers.
   const [settled, setSettled] = useState(false);
+  /*
+   * Expanded view. Implemented as a fixed overlay rather than the Fullscreen
+   * API, which is unreliable for non-video elements on iOS Safari. Everything
+   * about the globe is driven off host.clientWidth/clientHeight and watched by a
+   * ResizeObserver, so growing the container is all it takes — the canvas,
+   * projection and marker positions all follow on their own.
+   */
+  const [expanded, setExpanded] = useState(false);
   /*
    * Intro start time lives in a ref, not effect scope. If the effect re-runs for
    * any reason, effect-scoped timing restarts from zero every time — which left
@@ -111,7 +119,7 @@ export default function Globe({
      * A sphere and graticule are a perfectly legible globe on their own, so
      * there is no reason to block first paint on a 55KB download.
      */
-    let land: GeoPermissibleObjects | null = null;
+    let countries: FeatureCollection<Geometry, { name?: string }> | null = null;
 
     const graticule = geoGraticule10();
     const projection = geoOrthographic().precision(0.2);
@@ -234,11 +242,19 @@ export default function Globe({
       ctx.lineWidth = 0.8;
       ctx.stroke();
 
-      if (land) {
-        ctx.beginPath();
-        path(land);
-        ctx.fillStyle = landColor;
-        ctx.fill();
+      if (countries) {
+        // One fill per country so each continent carries its own colour. The
+        // hairline between them is what makes it read as a map rather than a
+        // set of coloured blobs.
+        for (const f of countries.features) {
+          ctx.beginPath();
+          path(f as unknown as GeoPermissibleObjects);
+          ctx.fillStyle = landColorFor(f.properties?.name);
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(56,9,13,.22)';
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
       }
 
       ctx.beginPath();
@@ -279,15 +295,18 @@ export default function Globe({
     };
     draw();
 
-      // Land arrives late and simply starts being drawn. A failure here leaves a
-      // sphere-and-graticule globe, which is still legible.
-      fetch(landUrl)
-        .then((r) => r.json())
-        .then((raw) => {
-          if (dead) return;
-          const topo = raw as Topology<{ land: GeometryCollection }>;
-          land = feature(topo, topo.objects.land) as unknown as GeoPermissibleObjects;
-        })
+    // Country geometry arrives late and simply starts being drawn. A failure
+    // here leaves a sphere-and-graticule globe, which is still legible.
+    fetch(countriesUrl)
+      .then((r) => r.json())
+      .then((raw) => {
+        if (dead) return;
+        const topo = raw as Topology<{ countries: GeometryCollection }>;
+        countries = feature(topo, topo.objects.countries) as unknown as FeatureCollection<
+          Geometry,
+          { name?: string }
+        >;
+      })
       .catch(() => {});
 
     return () => {
@@ -301,7 +320,21 @@ export default function Globe({
       window.removeEventListener('pointerup', endDrag);
       window.removeEventListener('pointercancel', endDrag);
     };
-  }, [landColor, oceanColor, spin]);
+  }, [oceanColor, spin]);
+
+  useEffect(() => {
+    if (!expanded) return;
+    const { overflow } = document.body.style;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setExpanded(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = overflow;
+    };
+  }, [expanded]);
 
   // Dismiss the info card on outside click or Escape.
   useEffect(() => {
@@ -326,10 +359,31 @@ export default function Globe({
   if (phase === 'fallback') return <>{children}</>;
 
   return (
-    <div className="relative w-full">
+    <div
+      className={
+        expanded
+          ? 'fixed inset-0 z-120 flex flex-col justify-center bg-bg px-4 py-6 sm:px-10'
+          : 'relative w-full'
+      }
+    >
+      {expanded && (
+        <button
+          type="button"
+          onClick={() => setExpanded(false)}
+          aria-label="Close expanded globe"
+          className="btn-outline absolute top-4 right-4 z-10 cursor-pointer bg-bg px-4 py-2 text-[13px]"
+        >
+          Close ✕
+        </button>
+      )}
+
       <div
         ref={hostRef}
-        className="relative aspect-[680/470] w-full cursor-grab touch-pan-y"
+        className={
+          expanded
+            ? 'relative w-full min-h-0 flex-1 cursor-grab touch-pan-y'
+            : 'relative aspect-[680/470] w-full cursor-grab touch-pan-y'
+        }
       >
         {/* The slotted route diagram stays mounted until the globe paints, so
             there is no blank frame and no layout shift when it swaps in. */}
@@ -367,12 +421,16 @@ export default function Globe({
                 {/* Brand-palette pin, drawn inline rather than shipping the
                     prototype's raster marker: one fewer request, crisp at any
                     DPR, and it matches the crest's maroon/gold. */}
+                {/* White outline, not gold: the pins now sit on seven different
+                    continent colours, and maroon-on-terracotta disappeared.
+                    A white halo separates them from anything underneath. */}
                 <svg viewBox="0 0 22 28" width="24" height="30" aria-hidden="true">
                   <path
                     d="M11 27C11 27 20.5 16.8 20.5 10.5A9.5 9.5 0 0 0 1.5 10.5C1.5 16.8 11 27 11 27Z"
-                    fill="#560F10"
-                    stroke="#D8A13A"
-                    strokeWidth="1.4"
+                    fill="#38090D"
+                    stroke="#FFFFFF"
+                    strokeWidth="1.8"
+                    strokeLinejoin="round"
                   />
                   <circle cx="11" cy="10.4" r="3.4" fill="#D8A13A" />
                 </svg>
@@ -419,9 +477,22 @@ export default function Globe({
         </div>
       </div>
 
-      <p className="eyebrow mt-1.5" style={{ fontSize: '10px', letterSpacing: '.12em' }}>
-        Drag to rotate · {DESTINATIONS.length} destinations plotted
-      </p>
+      <div className="mt-1.5 flex flex-wrap items-center justify-between gap-3">
+        <p className="eyebrow" style={{ fontSize: '10px', letterSpacing: '.12em' }}>
+          Drag to rotate · {DESTINATIONS.length} destinations plotted
+        </p>
+        {/* Expanded mode has its own close button pinned top-right, so this
+            toggle would just be a second identical control. */}
+        {!expanded && (
+          <button
+            type="button"
+            onClick={() => setExpanded(true)}
+            className="link-rule cursor-pointer border-0 bg-transparent text-[13px]"
+          >
+            Expand ⤢
+          </button>
+        )}
+      </div>
       {/*
         Same reason the campus tiles carry a disclaimer, and more pressing here:
         naming 25 selective universities on an admissions consultancy's home page

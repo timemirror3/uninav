@@ -150,6 +150,35 @@
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    /* Reserve the gutter so the page does not shift horizontally when a short
+       route (404, thank-you) has no scrollbar and a long one does. */
+    scrollbar-gutter: stable;
+  }
+
+  /* Slim, brand-tinted scrollbar. The default chrome-grey bar is the one piece
+     of UI on the page that ignores the palette entirely. */
+  @supports (scrollbar-width: thin) {
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: rgb(86 15 16 / 0.28) transparent;
+    }
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(86 15 16 / 0.24);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(86 15 16 / 0.4);
+    background-clip: content-box;
   }
 
   body {
