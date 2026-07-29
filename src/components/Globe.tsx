@@ -41,7 +41,7 @@ type Phase = 'pending' | 'live' | 'fallback';
  */
 export default function Globe({
   landColor = '#560F10',
-  oceanColor = '#EFDCAE',
+  oceanColor = '#A6C6D9',
   spin = true,
   children,
 }: Props) {
@@ -131,7 +131,7 @@ export default function Globe({
      * mid-intro does not fight the animation.
      */
     // Reduced motion: no fly-in, no fade — the globe is simply there.
-    const introMs = introSkipped ? 0 : 1400;
+    const introMs = introSkipped ? 0 : 1800;
     if (introStartRef.current === null) introStartRef.current = performance.now();
     const introStart = introStartRef.current;
     let baseRadius = 0;
@@ -194,10 +194,11 @@ export default function Globe({
 
       const paused = dragging || hoveredRef.current !== null || activeRef.current !== null;
       // Spin fast on arrival and decelerate into the resting drift.
-      const driftSpeed = 0.055 + (1 - eased) * 0.5;
+      const driftSpeed = 0.055 + (1 - eased) * 0.9;
       if (spin && !paused && !introSkipped) rotation[0] += driftSpeed;
       projection.rotate(rotation);
-      projection.scale(baseRadius * (0.62 + 0.38 * eased));
+      // Starts at 0.35x so the arrival actually reads as a zoom, not a nudge.
+      projection.scale(baseRadius * (0.35 + 0.65 * eased));
 
       ctx.clearRect(0, 0, width, height);
       ctx.globalAlpha = eased;
@@ -209,7 +210,7 @@ export default function Globe({
 
       ctx.beginPath();
       path(graticule);
-      ctx.strokeStyle = 'rgba(86,15,16,.14)';
+      ctx.strokeStyle = 'rgba(255,255,255,.45)';
       ctx.lineWidth = 0.8;
       ctx.stroke();
 

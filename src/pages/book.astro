@@ -45,8 +45,10 @@ const jsonLd = [
       class="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1fr_380px] lg:gap-12"
     >
       <div class="order-2 lg:order-1">
+        {/* client:load — the scheduler is the whole point of this page and sits
+            in the initial viewport. */}
         <CalEmbed
-          client:visible
+          client:load
           calLink={calLink}
           phone={SITE.phone}
           phoneHref={SITE.phoneHref}

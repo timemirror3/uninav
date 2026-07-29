@@ -32,7 +32,6 @@ type State = 'loading' | 'ready' | 'failed';
  */
 export default function CalEmbed({ calLink, phone, phoneHref, timeoutMs = 10000 }: Props) {
   const [state, setState] = useState<State>('loading');
-  const [visible, setVisible] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
 
   const bookingUrl = `https://cal.com/${calLink}`;
@@ -44,33 +43,21 @@ export default function CalEmbed({ calLink, phone, phoneHref, timeoutMs = 10000 
    */
   const embedUrl = `${bookingUrl}/embed?theme=light&layout=month_view&brandColor=%23560F10`;
 
-  // Defer the iframe until it is near the viewport.
-  useEffect(() => {
-    const node = wrapRef.current;
-    if (!node) return;
-    if (typeof IntersectionObserver === 'undefined') {
-      setVisible(true);
-      return;
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '250px' }
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
+  /*
+   * No internal IntersectionObserver.
+   *
+   * There used to be one gating `visible`, on top of Astro's own client:*
+   * deferral. It never fired in production — the island hydrated, `visible`
+   * stayed false, the iframe was never rendered, and /book sat on "Loading the
+   * scheduler…" forever with no fallback. Two lazy gates in series is one too
+   * many; the iframe's own loading="lazy" is enough.
+   */
   // If it never loads, show the fallback rather than an endless spinner.
   useEffect(() => {
-    if (!visible || state !== 'loading') return;
+    if (state !== 'loading') return;
     const timer = setTimeout(() => setState((s) => (s === 'loading' ? 'failed' : s)), timeoutMs);
     return () => clearTimeout(timer);
-  }, [visible, state, timeoutMs]);
+  }, [state, timeoutMs]);
 
   if (!calLink || state === 'failed') {
     return (
@@ -90,7 +77,7 @@ export default function CalEmbed({ calLink, phone, phoneHref, timeoutMs = 10000 
             href={bookingUrl}
             target="_blank"
             rel="noopener"
-            className="btn-primary px-6 py-3.5 text-[14px]"
+          className="btn-primary px-6 py-3.5 text-[14px]"
           >
             Open our booking page ↗
           </a>
@@ -117,18 +104,16 @@ export default function CalEmbed({ calLink, phone, phoneHref, timeoutMs = 10000 
             Loading the scheduler…
           </p>
         )}
-        {visible && (
-          <iframe
-            src={embedUrl}
-            title="Book a free consultation with University Navigator"
-            className="h-full w-full border-0"
-            loading="lazy"
-            onLoad={() => setState('ready')}
-            onError={() => setState('failed')}
-            // Only what the booking flow needs.
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-          />
-        )}
+        <iframe
+          src={embedUrl}
+          title="Book a free consultation with University Navigator"
+          className="h-full w-full border-0"
+          loading="lazy"
+          onLoad={() => setState('ready')}
+          onError={() => setState('failed')}
+          // Only what the booking flow needs.
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+        />
       </div>
     </div>
   );
