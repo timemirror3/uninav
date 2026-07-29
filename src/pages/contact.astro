@@ -1,0 +1,73 @@
+---
+import Base from '../layouts/Base.astro';
+import ContactForm from '../components/ContactForm.tsx';
+import { SITE } from '../lib/site';
+import { breadcrumbs, professionalService } from '../lib/jsonld';
+
+export const prerender = true;
+
+const turnstileSiteKey = import.meta.env['PUBLIC_TURNSTILE_SITE_KEY'] ?? '';
+
+const jsonLd = [
+  professionalService(),
+  breadcrumbs([
+    { name: 'Home', path: '/' },
+    { name: 'Contact', path: '/contact' },
+  ]),
+];
+---
+
+<Base
+  title="Contact"
+  description="Have questions about the college admissions process, or ready to get started? Email info@universitynavigator.org or call (424) 404-3686."
+  jsonLd={jsonLd}
+>
+  <div
+    class="mx-auto grid max-w-[1240px] grid-cols-1 items-start gap-10 px-5 py-12 sm:px-8 lg:grid-cols-[1fr_480px] lg:gap-18 lg:px-12 lg:py-18"
+  >
+    <div>
+      <div class="eyebrow eyebrow-lg mb-4">Contact</div>
+      <h1 class="mb-5 font-serif text-[clamp(34px,7vw,50px)] text-maroon">
+        We're here to help
+      </h1>
+      <p class="mb-10 max-w-[56ch] text-[16px] leading-[1.65] sm:text-[17px]">
+        Have questions about the college admissions process, or ready to get started?
+        Whether you're a student, a parent, or an educator, we're here to help.
+      </p>
+
+      <div class="flex flex-col gap-5 border-t border-rule pt-7">
+        <div>
+          <div class="eyebrow mb-1.5">Email</div>
+          <a
+            href={`mailto:${SITE.email}`}
+            class="font-serif text-[19px] no-underline sm:text-[22px]"
+          >
+            {SITE.email}
+          </a>
+        </div>
+        <div>
+          <div class="eyebrow mb-1.5">Phone</div>
+          <a href={SITE.phoneHref} class="font-serif text-[22px] no-underline">
+            {SITE.phone}
+          </a>
+        </div>
+        <div>
+          <div class="eyebrow mb-1.5">Prefer a longer form?</div>
+          <a href="/inquiry" class="text-[15px] font-semibold">
+            Submit a Request for Information →
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-6 sm:p-8">
+      <h2 class="sr-only">Send us a message</h2>
+      <ContactForm
+        client:load
+        turnstileSiteKey={turnstileSiteKey}
+        phone={SITE.phone}
+        phoneHref={SITE.phoneHref}
+      />
+    </div>
+  </div>
+</Base>

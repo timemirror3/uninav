@@ -1,0 +1,84 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import DraftFlag from '../../components/DraftFlag.astro';
+import { POLICY_LINKS } from '../../lib/site';
+import { breadcrumbs } from '../../lib/jsonld';
+
+export const prerender = true;
+
+export const getStaticPaths = (async () => {
+  const policies = await getCollection('policies');
+  return policies.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const currentPath = `/policies/${entry.id}`;
+
+const jsonLd = [
+  breadcrumbs([
+    { name: 'Home', path: '/' },
+    { name: entry.data.title, path: currentPath },
+  ]),
+];
+---
+
+<Base title={entry.data.title} description={entry.data.seoDescription} jsonLd={jsonLd}>
+  <div
+    class="mx-auto grid max-w-[1240px] grid-cols-1 items-start gap-8 px-5 py-12 sm:px-8 lg:grid-cols-[280px_1fr] lg:gap-16 lg:px-12 lg:py-18"
+  >
+    <nav aria-label="Policies" class="lg:sticky lg:top-[104px]">
+      <h2 class="eyebrow mb-3.5 font-sans">Policies</h2>
+      <ul class="flex list-none flex-col p-0">
+        {
+          POLICY_LINKS.map((link) => {
+            const active = link.href === currentPath;
+            return (
+              <li>
+                <a
+                  href={link.href}
+                  aria-current={active ? 'page' : undefined}
+                  class:list={[
+                    'block py-2 pl-3.5 text-[14px] no-underline hover:text-maroon-link',
+                    active
+                      ? 'border-l-2 border-gold font-semibold text-maroon'
+                      : 'border-l-2 border-[rgba(86,15,16,.12)] text-ink-soft',
+                  ]}
+                >
+                  {link.label}
+                </a>
+              </li>
+            );
+          })
+        }
+      </ul>
+
+      {
+        entry.data.tableOfContents.length > 0 && (
+          <>
+            <h2 class="eyebrow mt-7 mb-3 font-sans">On this page</h2>
+            <ul class="flex list-none flex-col gap-[7px] p-0 text-[13px] text-ink-soft">
+              {entry.data.tableOfContents.map((heading) => (
+                <li>{heading}</li>
+              ))}
+            </ul>
+          </>
+        )
+      }
+    </nav>
+
+    <article class="max-w-[68ch]">
+      <h1 class="mb-6 font-serif text-[clamp(30px,6vw,44px)] text-maroon">
+        {entry.data.title}
+      </h1>
+      <div class="prose-uni">
+        <Content components={{ DraftFlag }} />
+      </div>
+    </article>
+  </div>
+</Base>

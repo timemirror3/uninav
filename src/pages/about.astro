@@ -1,0 +1,157 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import DraftFlag from '../components/DraftFlag.astro';
+import founder from '../assets/founder-sam-atherton.png';
+import { breadcrumbs, founderPerson, professionalService } from '../lib/jsonld';
+
+export const prerender = true;
+
+const CREDENTIALS = [
+  {
+    heading: 'Graduate study',
+    items: [
+      { org: 'Benedictine University', detail: 'MBA, Marketing' },
+      {
+        org: 'Embry-Riddle Aeronautical University',
+        detail: 'M.S., Supply Chain Management',
+      },
+      { org: 'Norwich University', detail: "Master's, Military History" },
+      { org: 'Harvard University', detail: 'Graduate studies' },
+    ],
+  },
+  {
+    heading: 'Undergraduate study',
+    items: [
+      {
+        org: 'University of Southern California',
+        detail: 'B.S., Business Administration',
+      },
+      {
+        org: 'University of Southern California',
+        detail: 'B.A., International Relations',
+      },
+      { org: 'UC Berkeley', detail: 'B.A., History' },
+    ],
+  },
+  {
+    heading: 'Roles',
+    items: [
+      {
+        org: 'Professor, Mt. San Antonio College',
+        detail:
+          'Business Administration, International Business, Import & Export, Supply Chain Management, Introduction to Business, Business Communication, Organizational Behavior',
+      },
+      { org: 'USC Recruiter', detail: '' },
+      {
+        org: 'Previously',
+        detail: 'Chief Executive Officer of a commercial airline; National Sales Manager',
+      },
+    ],
+  },
+];
+
+const jsonLd = [
+  founderPerson(),
+  professionalService(),
+  breadcrumbs([
+    { name: 'Home', path: '/' },
+    { name: 'About', path: '/about' },
+  ]),
+];
+---
+
+<Base
+  title="About"
+  description="Sam Atherton is the Founder and President of University Navigator, Inc. — a professor at Mt. San Antonio College and a USC recruiter, with degrees from USC, UC Berkeley, and graduate studies at Harvard."
+  jsonLd={jsonLd}
+>
+  <div
+    class="mx-auto grid max-w-[1240px] grid-cols-1 items-start gap-10 px-5 pt-12 sm:px-8 lg:grid-cols-[1fr_460px] lg:gap-16 lg:px-12 lg:pt-18"
+  >
+    <div>
+      <div class="eyebrow eyebrow-lg mb-4">About the firm</div>
+      <h1
+        id="sam-atherton"
+        class="mb-[22px] font-serif text-[clamp(34px,7vw,50px)] leading-[1.08] text-maroon"
+      >
+        Sam Atherton<br />
+        <span class="text-[clamp(19px,3.5vw,26px)] text-gold-dark">
+          Founder and President
+        </span>
+      </h1>
+      <p class="mb-[18px] max-w-[60ch] text-[17px] leading-[1.65] sm:text-[18px]">
+        Sam Atherton is the Founder and President of University Navigator, Inc., where he
+        provides professional educational consulting to students and families navigating
+        the college admissions process.
+      </p>
+      <p class="mb-[18px] max-w-[60ch] text-[16px] leading-[1.65] sm:text-[17px]">
+        His international experience spans more than 20 countries across Asia, Europe,
+        Oceania, North America, and South America — perspective he brings to students
+        weighing options at home and abroad.
+        <DraftFlag note="closing paragraphs condensed from source" />
+      </p>
+      <p class="m-0 max-w-[60ch] text-[16px] leading-[1.65] sm:text-[17px]">
+        University Navigator, Inc. is committed to guiding every student with clarity,
+        candor, and care — and never guarantees admissions outcomes.
+        <DraftFlag />
+      </p>
+    </div>
+
+    <figure class="m-0">
+      <Image
+        src={founder}
+        alt="Sam Atherton at a USC recruiting table at a high school college fair"
+        width={920}
+        height={690}
+        densities={[1, 2]}
+        loading="eager"
+        class="block h-auto w-full rounded-[6px]"
+      />
+      <figcaption class="mt-2.5 text-[12px] text-ink-muted">
+        Sam at a USC recruiting table at a high school college fair.
+      </figcaption>
+    </figure>
+  </div>
+
+  {/* ======================== CREDENTIALS ======================== */}
+  <div
+    class="mx-auto grid max-w-[1240px] grid-cols-1 gap-10 px-5 py-12 sm:grid-cols-2 sm:px-8 lg:grid-cols-3 lg:px-12 lg:py-16"
+  >
+    {
+      CREDENTIALS.map((column) => (
+        <section>
+          <h2 class="eyebrow eyebrow-lg mb-4 border-b border-rule pb-3 font-sans">
+            {column.heading}
+          </h2>
+          <ul class="flex list-none flex-col gap-3.5 p-0 text-[15px] leading-[1.5]">
+            {column.items.map((item) => (
+              <li>
+                <strong class="text-maroon">{item.org}</strong>
+                {item.detail && (
+                  <>
+                    <br />
+                    {item.detail}
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
+
+  {/* ========================= PULL QUOTE ========================= */}
+  <div class="bg-maroon px-5 py-14 text-center sm:px-8 lg:px-12 lg:py-16">
+    <blockquote
+      class="mx-auto mb-7 max-w-[34ch] border-0 p-0 font-serif text-[clamp(21px,4.5vw,28px)] leading-[1.5] text-bg"
+    >
+      "From first draft to acceptance letter, we help students see not just where they
+      can go, but who they can become."
+    </blockquote>
+    <a href="/book" class="btn-gold px-[30px] py-4 text-[15px]">
+      Book a free consultation
+    </a>
+  </div>
+</Base>
