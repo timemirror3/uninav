@@ -34,7 +34,10 @@ type Phase = 'pending' | 'live' | 'fallback';
  *  2. Marker positions are mutated on the DOM inside the rAF loop rather than
  *     held in React state — 25 markers re-rendering every frame would be
  *     unusable.
- *  3. `prefers-reduced-motion` drops to the static route rather than spinning.
+ *  3. `prefers-reduced-motion` keeps the globe but removes the motion — no
+ *     fly-in, no fade, no auto-spin. Still draggable.
+ *
+ * The slotted route diagram remains the fallback for no-JS and no-canvas.
  */
 export default function Globe({
   landColor = '#560F10',
@@ -51,6 +54,15 @@ export default function Globe({
   const [phase, setPhase] = useState<Phase>('pending');
   const [active, setActive] = useState<Destination | null>(null);
   const [hovered, setHovered] = useState<Destination | null>(null);
+  // True once the intro animation has finished; gates the markers.
+  const [settled, setSettled] = useState(false);
+  /*
+   * Intro start time lives in a ref, not effect scope. If the effect re-runs for
+   * any reason, effect-scoped timing restarts from zero every time — which left
+   * globalAlpha pinned near 0 and the globe invisible. Anchoring it to the
+   * component means the intro runs exactly once.
+   */
+  const introStartRef = useRef<number | null>(null);
 
   // Mirror interaction state into refs so the rAF loop reads it without
   // re-subscribing every render.
@@ -60,15 +72,16 @@ export default function Globe({
   hoveredRef.current = hovered;
 
   useEffect(() => {
-    // Honour reduced motion by not running the globe at all — the slotted route
-    // diagram is the calmer equivalent, and it is already on the page.
-    const reduced =
+    /*
+     * Reduced motion keeps the globe but removes the motion: no fly-in, no
+     * fade, no auto-spin. Dropping to the static route entirely was too blunt —
+     * "reduce motion" is not "remove content", and it meant anyone with the OS
+     * setting on (it is the default on plenty of managed Windows builds) never
+     * saw the hero at all. It stays fully draggable.
+     */
+    const introSkipped =
       typeof matchMedia === 'function' &&
       matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduced) {
-      setPhase('fallback');
-      return;
-    }
 
     const host = hostRef.current;
     const canvas = canvasRef.current;
@@ -108,13 +121,30 @@ export default function Globe({
     let width = 0;
     let height = 0;
 
+    /*
+     * Intro: the globe arrives from far away and settles.
+     *
+     * Scale eases from 0.62x to full on an ease-out-cubic while the sphere fades
+     * up and spins a little faster than its resting drift, so it decelerates
+     * into place rather than snapping on. Radius is recomputed every frame from
+     * `baseRadius`, which the ResizeObserver keeps current — so a resize
+     * mid-intro does not fight the animation.
+     */
+    // Reduced motion: no fly-in, no fade — the globe is simply there.
+    const introMs = introSkipped ? 0 : 1400;
+    if (introStartRef.current === null) introStartRef.current = performance.now();
+    const introStart = introStartRef.current;
+    let baseRadius = 0;
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
     const resize = () => {
       width = host.clientWidth;
       height = host.clientHeight;
       canvas.width = width * dpr;
       canvas.height = height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      projection.translate([width / 2, height / 2]).scale(Math.min(width, height) * 0.46);
+      baseRadius = Math.min(width, height) * 0.46;
+      projection.translate([width / 2, height / 2]).scale(baseRadius);
     };
     resize();
     resizeObserver = new ResizeObserver(resize);
@@ -150,16 +180,27 @@ export default function Globe({
     window.addEventListener('pointercancel', endDrag);
 
     setPhase('live');
+    // Markers appear once the globe has settled, so they do not fly across the
+    // canvas while it is still scaling in.
+    const settleTimer = setTimeout(() => setSettled(true), introMs);
 
     const draw = () => {
       if (dead) return;
       frame = requestAnimationFrame(draw);
 
+      // Intro progress: 0 → 1 over INTRO_MS, then pinned at 1 forever.
+      const intro = introMs === 0 ? 1 : Math.min(1, (performance.now() - introStart) / introMs);
+      const eased = easeOutCubic(intro);
+
       const paused = dragging || hoveredRef.current !== null || activeRef.current !== null;
-      if (spin && !paused) rotation[0] += 0.055;
+      // Spin fast on arrival and decelerate into the resting drift.
+      const driftSpeed = 0.055 + (1 - eased) * 0.5;
+      if (spin && !paused && !introSkipped) rotation[0] += driftSpeed;
       projection.rotate(rotation);
+      projection.scale(baseRadius * (0.62 + 0.38 * eased));
 
       ctx.clearRect(0, 0, width, height);
+      ctx.globalAlpha = eased;
 
       ctx.beginPath();
       path({ type: 'Sphere' });
@@ -184,6 +225,8 @@ export default function Globe({
       ctx.strokeStyle = '#D8A13A';
       ctx.lineWidth = 1.2;
       ctx.stroke();
+
+      ctx.globalAlpha = 1;
 
       const centre: [number, number] = [-rotation[0], -rotation[1]];
       DESTINATIONS.forEach((destination, index) => {
@@ -228,6 +271,7 @@ export default function Globe({
 
     return () => {
       dead = true;
+      clearTimeout(settleTimer);
       cancelAnimationFrame(frame);
       resizeObserver?.disconnect();
       canvas.removeEventListener('pointerdown', onPointerDown);
@@ -276,6 +320,7 @@ export default function Globe({
             diagram, which is what the broken state looked like. */}
         <ul className="contents list-none">
           {phase === 'live' &&
+            settled &&
             DESTINATIONS.map((destination, index) => (
             <li key={destination.name} className="contents">
               <button
