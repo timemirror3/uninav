@@ -1,0 +1,37 @@
+---
+/**
+ * Renders the prototype's `[DRAFT COPY — REVIEW]` / `[RECOMMENDATION: …]` markers.
+ *
+ * These exist so the owner and counsel can see which passages still need sign-off.
+ * They must never reach production, so the component renders nothing unless
+ * `import.meta.env.DEV` is true — the markup is not emitted at all in a
+ * production build, rather than merely hidden with CSS.
+ *
+ * Every passage wrapped in one of these is catalogued in CONTENT-REVIEW.md.
+ */
+interface Props {
+  /** 'draft' → [DRAFT COPY — REVIEW]; 'recommendation' → [RECOMMENDATION: …] */
+  type?: 'draft' | 'recommendation';
+  /** Appended after a colon, e.g. note="condensed from supplied bio". */
+  note?: string;
+}
+
+const { type = 'draft', note } = Astro.props;
+
+const label =
+  type === 'recommendation'
+    ? `[RECOMMENDATION: ${note ?? ''}]`
+    : `[DRAFT COPY — REVIEW${note ? `: ${note}` : ''}]`;
+---
+
+{
+  import.meta.env.DEV && (
+    <span
+      class="font-mono text-[10px] leading-none text-flag"
+      data-draft-flag={type}
+      title="Visible in development only — see CONTENT-REVIEW.md"
+    >
+      {label}
+    </span>
+  )
+}

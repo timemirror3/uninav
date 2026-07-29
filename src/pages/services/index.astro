@@ -1,0 +1,172 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import RefundPolicyBlock from '../../components/RefundPolicyBlock.astro';
+import { PRODUCTS } from '../../lib/products';
+import { breadcrumbs, servicesItemList } from '../../lib/jsonld';
+
+export const prerender = true;
+
+const services = await getCollection('services');
+const bySlug = (slug: string) => services.find((entry) => entry.data.slug === slug)!;
+
+const bundle = bySlug('counseling-bundle');
+const essay = bySlug('essay-review');
+const addons = ['essay-reviews-5', 'zoom-followups-5', 'rush-consultation'].map(bySlug);
+
+/** Render **bold** segments in the card bullets without pulling in a markdown pass. */
+function renderBold(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+}
+
+const jsonLd = [
+  servicesItemList(),
+  breadcrumbs([
+    { name: 'Home', path: '/' },
+    { name: 'Services', path: '/services' },
+  ]),
+];
+---
+
+<Base
+  title="Services"
+  description="Clear engagements, clearly priced. The University Counseling Bundle at $2,750.00 every three months, single essay reviews at $300.00, and add-ons for longer school lists."
+  jsonLd={jsonLd}
+>
+  <div class="mx-auto max-w-[1240px] px-5 py-12 sm:px-8 lg:px-12 lg:py-18">
+    <div class="eyebrow eyebrow-lg mb-4">Services</div>
+    <h1 class="mb-[22px] max-w-[20ch] font-serif text-[clamp(34px,7vw,52px)] text-maroon">
+      Clear engagements, clearly priced
+    </h1>
+    <p class="mb-14 max-w-[68ch] text-[16px] leading-[1.65] sm:text-[17px]">
+      At University Navigator, Inc. we provide professional educational consulting
+      designed to help students and their families navigate the college admissions
+      process with clarity, confidence, and purpose. Every engagement includes only the
+      services expressly listed — no ambiguity, no surprises.
+    </p>
+
+    {/* ===================== PRIMARY ENGAGEMENTS ===================== */}
+    <div class="mb-14 grid grid-cols-1 gap-6 lg:grid-cols-2">
+      {/* Counseling bundle — maroon card */}
+      <div class="flex flex-col rounded-[6px] bg-maroon p-7 sm:p-10">
+        <div class="eyebrow mb-3.5 text-gold">{PRODUCTS['counseling-bundle'].kind}</div>
+        <h2 class="mb-3 font-serif text-[clamp(24px,4.5vw,30px)] text-bg">
+          {bundle.data.name}
+        </h2>
+        <p class="mb-6 text-[15px] leading-[1.6] text-cream">{bundle.data.cardSummary}</p>
+        <ul class="mb-7 flex list-none flex-col gap-2.5 p-0 text-[14px] text-bg">
+          {
+            bundle.data.cardBullets.map((bullet) => (
+              <li class="flex gap-2.5">
+                <span class="text-gold" aria-hidden="true">
+                  ◆
+                </span>
+                <span set:html={renderBold(bullet)} />
+              </li>
+            ))
+          }
+        </ul>
+        <div
+          class="mt-auto flex flex-wrap items-center justify-between gap-4 border-t border-rule-gold pt-5"
+        >
+          <div>
+            <span class="font-serif text-[clamp(24px,4.5vw,30px)] text-bg">
+              {PRODUCTS['counseling-bundle'].price}
+            </span>
+            <span class="text-[13px] text-cream-muted"> / 3 months</span>
+          </div>
+          <a
+            href="/services/counseling-bundle"
+            class="btn-gold px-[22px] py-[13px] text-[14px]"
+          >
+            Details
+          </a>
+        </div>
+      </div>
+
+      {/* Essay review — white card */}
+      <div class="card flex flex-col p-7 sm:p-10">
+        <div class="eyebrow mb-3.5">{PRODUCTS['essay-review'].kind}</div>
+        <h2 class="mb-3 font-serif text-[clamp(24px,4.5vw,30px)] text-maroon">
+          {essay.data.name}
+        </h2>
+        <p class="mb-6 text-[15px] leading-[1.6]">{essay.data.cardSummary}</p>
+        <ul class="mb-7 flex list-none flex-col gap-2.5 p-0 text-[14px]">
+          {
+            essay.data.cardBullets.map((bullet) => (
+              <li class="flex gap-2.5">
+                <span class="text-gold-dark" aria-hidden="true">
+                  ◆
+                </span>
+                <span set:html={renderBold(bullet)} />
+              </li>
+            ))
+          }
+        </ul>
+        <div
+          class="mt-auto flex flex-wrap items-center justify-between gap-4 border-t border-rule pt-5"
+        >
+          <div>
+            <span class="font-serif text-[clamp(24px,4.5vw,30px)] text-maroon">
+              {PRODUCTS['essay-review'].price}
+            </span>
+            <span class="text-[13px] text-ink-muted"> one-time</span>
+          </div>
+          <a
+            href="/services/essay-review"
+            class="btn-primary px-[22px] py-[13px] text-[14px]"
+          >
+            Details
+          </a>
+        </div>
+      </div>
+    </div>
+
+    {/* ========================== ADD-ONS ========================== */}
+    <h2 class="eyebrow eyebrow-lg mb-[18px] font-sans">
+      Add-ons — supplement an existing engagement
+    </h2>
+    <div class="mb-16 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        addons.map((entry) => {
+          const product = PRODUCTS[entry.data.slug];
+          return (
+            <div class="flex flex-col rounded-[6px] border border-rule bg-[rgba(255,255,255,.5)] p-6">
+              <h3 class="mb-2 font-serif text-[20px] text-maroon">{entry.data.name}</h3>
+              <p class="mb-4 text-[14px] leading-[1.55] text-ink-soft">
+                {entry.data.cardSummary}
+              </p>
+              <div class="mt-auto flex items-center justify-between gap-3">
+                <span class="font-serif text-[22px] text-maroon">{product.price}</span>
+                {/* Rush points at its own detail page, not the scheduler: it goes
+                    through the same refund-acknowledgement gate as everything else. */}
+                <a
+                  href={`/services/${entry.data.slug}`}
+                  class="link-rule text-[13px] whitespace-nowrap"
+                >
+                  Details
+                </a>
+              </div>
+              {entry.data.cardFootnote && (
+                <div class="mt-3 text-[11px] text-ink-muted">
+                  {entry.data.cardFootnote}
+                </div>
+              )}
+            </div>
+          );
+        })
+      }
+    </div>
+
+    {/* ======================= REFUND POLICY ======================= */}
+    <div
+      class="grid grid-cols-1 gap-6 border-t border-rule pt-10 lg:grid-cols-[280px_1fr] lg:gap-12"
+    >
+      <h2 class="eyebrow eyebrow-lg font-sans">Refund policy</h2>
+      <RefundPolicyBlock size="lg" showLink />
+    </div>
+  </div>
+</Base>

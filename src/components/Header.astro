@@ -1,0 +1,81 @@
+---
+import { Image } from 'astro:assets';
+import crest from '../assets/crest-logo.png';
+import Compass from './Compass.tsx';
+import MobileNav from './MobileNav.tsx';
+import { NAV_LINKS, SITE, bearingFor } from '../lib/site';
+
+const { pathname } = Astro.url;
+const { deg, label } = bearingFor(pathname);
+
+// The crest is the one image in the header; render it at 2x for retina and let
+// astro:assets emit the hashed, resized file.
+const crestImage = await import('astro:assets').then(({ getImage }) =>
+  getImage({ src: crest, width: 88, height: 88, format: 'webp' })
+);
+
+function isActive(href: string) {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+const mobileLinks = [{ href: '/', label: 'Home' }, ...NAV_LINKS];
+---
+
+<header
+  class="sticky top-0 z-50 border-b border-rule bg-[rgba(250,247,241,.92)] backdrop-blur-[8px]"
+>
+  <div
+    class="mx-auto flex h-[76px] max-w-[1440px] items-center gap-4 px-5 sm:px-8 lg:gap-7 lg:px-12"
+  >
+    <a href="/" class="mr-auto flex items-center gap-[13px] no-underline">
+      <Image
+        src={crest}
+        alt="University Navigator crest"
+        width={88}
+        height={88}
+        densities={[1, 2]}
+        loading="eager"
+        class="block h-11 w-11 rounded-full"
+      />
+      <span class="font-serif text-[16px] font-semibold text-maroon sm:text-[19px]">
+        University Navigator, Inc.
+      </span>
+    </a>
+
+    <nav aria-label="Primary" class="hidden gap-7 text-[14px] font-medium lg:flex">
+      {
+        NAV_LINKS.map((link) => (
+          <a
+            href={link.href}
+            aria-current={isActive(link.href) ? 'page' : undefined}
+            class:list={[
+              'border-b-2 pb-0.5 no-underline hover:border-gold hover:text-maroon',
+              isActive(link.href)
+                ? 'border-gold text-maroon'
+                : 'border-transparent text-ink',
+            ]}
+          >
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <Compass client:idle bearing={deg} label={label} />
+
+    <a
+      href="/book"
+      class="btn-gold hidden px-[22px] py-3 text-[14px] sm:inline-block"
+    >
+      Book a consultation
+    </a>
+
+    <MobileNav
+      client:idle
+      links={mobileLinks}
+      crestSrc={crestImage.src}
+      email={SITE.email}
+      phone={SITE.phone}
+    />
+  </div>
+</header>

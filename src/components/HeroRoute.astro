@@ -1,0 +1,93 @@
+---
+import { Image } from 'astro:assets';
+import crest from '../assets/crest-logo.png';
+
+/**
+ * The home hero's plotted-route diagram.
+ *
+ * The path, dash pattern, waypoint circles and label positions are the
+ * prototype's, verbatim. The prototype hard-coded a 680×470 box with absolutely
+ * positioned label divs; here the box keeps that aspect ratio and the labels are
+ * positioned as percentages of it so they track the curve as it scales.
+ *
+ * Below 640px the 11px labels would collide with the curve and each other, so
+ * they collapse into the ordered route line underneath — same four waypoints,
+ * legible at small sizes.
+ */
+const WAYPOINTS = [
+  { label: 'SOPHOMORE PLAN', left: '2.1%', top: '89.8%', gold: false },
+  { label: 'JUNIOR TESTING', left: '43.5%', top: '58.3%', gold: false },
+  { label: 'ESSAY DRAFTS', left: '65.3%', top: '43.0%', gold: false },
+  { label: 'DECISIONS', left: '81.2%', top: '8.9%', gold: true },
+];
+---
+
+<div class="relative w-full">
+  <div class="relative aspect-[680/470] w-full">
+    <svg
+      viewBox="0 0 680 470"
+      class="absolute inset-0 h-full w-full"
+      role="img"
+      aria-label="A plotted route rising from a sophomore plan through junior testing and essay drafts to admissions decisions."
+    >
+      <path
+        d="M40 410 C 180 370, 200 292, 320 262 S 520 175, 620 78"
+        fill="none"
+        stroke="#D8A13A"
+        stroke-width="1.5"
+        stroke-dasharray="1 7"
+        stroke-linecap="round"
+        class="motion-safe:animate-drawin"
+      ></path>
+      <circle cx="40" cy="410" r="5" fill="#FAF7F1" stroke="#560F10" stroke-width="1.5"
+      ></circle>
+      <circle cx="320" cy="262" r="5" fill="#FAF7F1" stroke="#560F10" stroke-width="1.5"
+      ></circle>
+      <circle cx="470" cy="190" r="5" fill="#FAF7F1" stroke="#560F10" stroke-width="1.5"
+      ></circle>
+      <circle cx="620" cy="78" r="7" fill="#D8A13A" stroke="#560F10" stroke-width="1.5"
+      ></circle>
+    </svg>
+
+    {
+      WAYPOINTS.map((point) => (
+        <div
+          class:list={[
+            'absolute hidden whitespace-nowrap sm:block',
+            point.gold ? 'text-gold-dark' : 'text-maroon',
+          ]}
+          style={`left:${point.left};top:${point.top};font:600 11px 'Public Sans';letter-spacing:.14em`}
+          aria-hidden="true"
+        >
+          {point.label}
+        </div>
+      ))
+    }
+
+    <Image
+      src={crest}
+      alt=""
+      width={370}
+      height={370}
+      densities={[1, 2]}
+      loading="eager"
+      fetchpriority="high"
+      class="motion-safe:animate-rise absolute right-[5%] bottom-0 h-auto w-[38%] max-w-[185px] rounded-full shadow-[0_12px_40px_rgba(56,9,13,.25)]"
+    />
+  </div>
+
+  {/* Small-screen equivalent of the four labels. */}
+  <ol
+    class="mt-4 flex list-none flex-wrap items-center gap-x-2 gap-y-1 p-0 sm:hidden"
+    style="font:600 10px 'Public Sans';letter-spacing:.12em"
+  >
+    {
+      WAYPOINTS.map((point, index) => (
+        <>
+          {index > 0 && <li class="text-gold" aria-hidden="true">→</li>}
+          <li class={point.gold ? 'text-gold-dark' : 'text-maroon'}>{point.label}</li>
+        </>
+      ))
+    }
+  </ol>
+</div>

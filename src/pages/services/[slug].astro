@@ -1,0 +1,119 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import DraftFlag from '../../components/DraftFlag.astro';
+import RefundPolicyBlock from '../../components/RefundPolicyBlock.astro';
+import PurchaseRail from '../../components/PurchaseRail.tsx';
+import { PRODUCTS } from '../../lib/products';
+import { REFUND_ACK_TEXT } from '../../lib/site';
+import { breadcrumbs, serviceOffer } from '../../lib/jsonld';
+
+export const prerender = true;
+
+export const getStaticPaths = (async () => {
+  const services = await getCollection('services');
+  return services.map((entry) => ({
+    params: { slug: entry.data.slug },
+    props: { entry },
+  }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const product = PRODUCTS[entry.data.slug];
+const { Content } = await render(entry);
+
+const jsonLd = [
+  serviceOffer(product, entry.data.seoDescription),
+  breadcrumbs([
+    { name: 'Home', path: '/' },
+    { name: 'Services', path: '/services' },
+    { name: entry.data.name, path: `/services/${entry.data.slug}` },
+  ]),
+];
+---
+
+<Base title={entry.data.name} description={entry.data.seoDescription} jsonLd={jsonLd}>
+  <div class="mx-auto max-w-[1240px] px-5 py-12 sm:px-8 lg:px-12 lg:py-18">
+    <a
+      href="/services"
+      class="eyebrow no-underline hover:text-maroon"
+      style="letter-spacing:.14em"
+    >
+      ← All services
+    </a>
+
+    <div
+      class="mt-7 grid grid-cols-1 items-start gap-10 lg:grid-cols-[1fr_420px] lg:gap-16"
+    >
+      {/* ---------------------------- MAIN ---------------------------- */}
+      <div>
+        <div class="eyebrow mb-3.5">{product.kind}</div>
+        <h1
+          class="mb-5 font-serif text-[clamp(30px,6vw,46px)] leading-[1.1] text-maroon"
+        >
+          {entry.data.name}
+        </h1>
+        <p class="mb-9 max-w-[60ch] text-[17px] leading-[1.65] sm:text-[18px]">
+          {entry.data.lede}
+        </p>
+
+        <h2 class="eyebrow eyebrow-lg mb-4 font-sans">What's included</h2>
+        <ol class="m-0 list-none p-0">
+          {
+            entry.data.includes.map((item) => (
+              <li class="flex gap-4 border-t border-rule py-4">
+                <span class="eyebrow w-7 shrink-0 pt-1 text-gold">{item.n}</span>
+                <div>
+                  <div class="mb-1 font-serif text-[20px] text-maroon">{item.t}</div>
+                  <div class="text-[15px] leading-[1.6] text-ink-soft">{item.d}</div>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+
+        {/* Optional extra prose from the MDX body. */}
+        <div class="prose-uni mt-8 empty:hidden">
+          <Content components={{ DraftFlag }} />
+        </div>
+
+        {
+          entry.data.how && (
+            <div class="mt-9 border-t border-rule pt-7">
+              <h2 class="eyebrow eyebrow-lg mb-3 font-sans">How it works</h2>
+              <p class="m-0 max-w-[60ch] text-[16px] leading-[1.65]">{entry.data.how}</p>
+            </div>
+          )
+        }
+
+        {
+          entry.data.addon && (
+            <p class="mt-7 rounded-[4px] border border-[rgba(216,161,58,.5)] bg-wash-gold px-[18px] py-3.5 text-[14px] text-gold-dark">
+              This add-on supplements an existing engagement with University Navigator,
+              Inc.
+            </p>
+          )
+        }
+
+        <div class="mt-11 border-t border-rule pt-7">
+          <h2 class="eyebrow eyebrow-lg mb-3 font-sans">Refund policy</h2>
+          <RefundPolicyBlock size="sm" />
+        </div>
+      </div>
+
+      {/* ------------------------ PURCHASE RAIL ------------------------ */}
+      <div class="lg:sticky lg:top-[104px]">
+        <PurchaseRail
+          client:load
+          slug={entry.data.slug}
+          price={product.price}
+          term={product.term}
+          billingNote={product.billingNote}
+          cta={product.cta}
+          refundAckText={REFUND_ACK_TEXT}
+        />
+      </div>
+    </div>
+  </div>
+</Base>

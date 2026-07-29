@@ -1,0 +1,87 @@
+---
+import { Image } from 'astro:assets';
+import crest from '../assets/crest-logo.png';
+import NewsletterForm from './NewsletterForm.tsx';
+import { FOOTER_EXPLORE, LEGAL_DISCLAIMER, POLICY_LINKS, SITE } from '../lib/site';
+
+const turnstileSiteKey = import.meta.env['PUBLIC_TURNSTILE_SITE_KEY'] ?? '';
+---
+
+<footer class="mt-18 bg-maroon-deep">
+  <div
+    class="mx-auto grid max-w-[1240px] grid-cols-1 gap-10 px-5 pt-16 sm:grid-cols-2 sm:px-8 lg:grid-cols-[1.3fr_1fr_1fr_1.4fr] lg:gap-12 lg:px-12"
+  >
+    <div>
+      <Image
+        src={crest}
+        alt="University Navigator crest"
+        width={176}
+        height={176}
+        densities={[1, 2]}
+        loading="lazy"
+        class="mb-[18px] block h-22 w-22"
+      />
+      <div class="mb-2 font-serif text-[20px] text-bg">{SITE.name}</div>
+      <div class="max-w-[30ch] text-[14px] leading-relaxed text-cream-muted">
+        {SITE.tagline}
+      </div>
+    </div>
+
+    <nav aria-labelledby="footer-explore">
+      <div id="footer-explore" class="eyebrow mb-[14px] text-gold">Explore</div>
+      <ul class="flex list-none flex-col gap-[9px] p-0 text-[14px]">
+        {
+          FOOTER_EXPLORE.map((link) => (
+            <li>
+              <a href={link.href} class="text-cream no-underline hover:text-bg">
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <nav aria-labelledby="footer-policies">
+      <div id="footer-policies" class="eyebrow mb-[14px] text-gold">Policies</div>
+      <ul class="flex list-none flex-col gap-[9px] p-0 text-[14px]">
+        {
+          POLICY_LINKS.map((link) => (
+            <li>
+              <a href={link.href} class="text-cream no-underline hover:text-bg">
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div>
+      <div class="eyebrow mb-[14px] text-gold">Contact</div>
+      <div class="mb-6 flex flex-col gap-[9px] text-[14px]">
+        <a href={`mailto:${SITE.email}`} class="text-cream no-underline hover:text-bg">
+          {SITE.email}
+        </a>
+        <a href={SITE.phoneHref} class="text-cream no-underline hover:text-bg">
+          {SITE.phone}
+        </a>
+      </div>
+
+      <div class="eyebrow mb-3 text-gold" id="newsletter-heading">
+        Occasional guidance, by email
+      </div>
+      <NewsletterForm client:visible turnstileSiteKey={turnstileSiteKey} />
+    </div>
+  </div>
+
+  <div class="mx-auto max-w-[1240px] px-5 pt-9 pb-10 sm:px-8 lg:px-12">
+    <div class="flex flex-col gap-2 border-t border-rule-gold pt-6">
+      <div class="text-[13px] text-cream-muted">{LEGAL_DISCLAIMER}</div>
+      <div class="text-[12px] text-cream-muted">
+        © 2026 {SITE.name} · Campus photography licensed via Unsplash / Wikimedia Commons
+        — attribution in credits · Photos are atmosphere, not a claim of affiliation.
+      </div>
+    </div>
+  </div>
+</footer>

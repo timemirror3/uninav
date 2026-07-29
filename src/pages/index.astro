@@ -1,0 +1,275 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import HeroRoute from '../components/HeroRoute.astro';
+import CampusTiles from '../components/CampusTiles.astro';
+import DraftFlag from '../components/DraftFlag.astro';
+import crest from '../assets/crest-logo.png';
+import founder from '../assets/founder-sam-atherton.png';
+import { SITE } from '../lib/site';
+import { PRODUCTS } from '../lib/products';
+import { founderPerson, professionalService, servicesItemList } from '../lib/jsonld';
+
+export const prerender = true;
+
+const services = await getCollection('services');
+const bundle = services.find((entry) => entry.data.slug === 'counseling-bundle')!;
+const essay = services.find((entry) => entry.data.slug === 'essay-review')!;
+
+const WAYPOINTS = [
+  { n: 'WAYPOINT 01', title: 'Annual planning session' },
+  { n: 'WAYPOINT 02', title: 'Essay reviews, line by line' },
+  { n: 'WAYPOINT 03', title: 'Follow-up Zoom sessions' },
+];
+
+const ROUTE_STEPS = [
+  {
+    n: '01',
+    title: 'Map the school year',
+    detail: 'Course selection, extracurriculars, recommendations',
+  },
+  {
+    n: '02',
+    title: 'Shape the essays',
+    detail: 'Line-by-line review, 72-hour turnaround',
+  },
+  {
+    n: '03',
+    title: 'Refine the strategy',
+    detail: 'Follow-up sessions, check-ins, expert answers',
+  },
+  {
+    n: '04',
+    title: 'Submit with confidence',
+    detail: 'Applications that sound like the student',
+  },
+];
+
+const jsonLd = [professionalService(), founderPerson(), servicesItemList()];
+---
+
+<Base
+  title="University Navigator, Inc. — Independent college admissions consulting"
+  description={SITE.description}
+  bareTitle
+  jsonLd={jsonLd}
+>
+  {/* ============================ HERO ============================ */}
+  <div
+    class="mx-auto grid max-w-[1440px] grid-cols-1 items-start gap-10 px-5 pt-12 sm:px-8 lg:grid-cols-[minmax(0,600px)_1fr] lg:gap-12 lg:px-12 lg:pt-20"
+  >
+    <div>
+      <p
+        class="eyebrow eyebrow-lg motion-safe:animate-rise mb-[22px]"
+        style="animation-delay:.15s"
+      >
+        Independent college admissions consulting · {SITE.region}
+      </p>
+      <h1
+        class="motion-safe:animate-rise mb-[26px] font-serif text-[clamp(38px,8.5vw,62px)] leading-[1.06] tracking-[-.015em] text-maroon"
+        style="animation-delay:.3s"
+      >
+        Every college is within your&nbsp;reach
+      </h1>
+      <p
+        class="motion-safe:animate-rise mb-9 max-w-[54ch] text-[17px] leading-[1.65] sm:text-[18px]"
+        style="animation-delay:.45s"
+      >
+        From first draft to acceptance letter, we help students see not just where they
+        can go, but who they can become.
+      </p>
+      <div
+        class="motion-safe:animate-rise flex flex-wrap items-center gap-4"
+        style="animation-delay:.6s"
+      >
+        <a href="/book" class="btn-primary px-7 py-4 text-[15px]">
+          Book a free consultation
+        </a>
+        <a href="/services" class="link-rule text-[15px]">Explore services</a>
+      </div>
+      <p
+        class="motion-safe:animate-rise mt-7 text-[12px] text-ink-muted"
+        style="animation-delay:.7s"
+      >
+        30 minutes, free, no obligation. <DraftFlag />
+      </p>
+    </div>
+
+    <HeroRoute />
+  </div>
+
+  {/* ========================== WAYPOINTS ========================== */}
+  <div class="mx-auto mt-14 flex max-w-[1440px] flex-col border-y border-rule sm:flex-row">
+    {
+      WAYPOINTS.map((point, index) => (
+        <div
+          class:list={[
+            'flex-1 px-5 py-[22px] sm:px-8 lg:px-12',
+            index < WAYPOINTS.length - 1 &&
+              'border-b border-rule sm:border-r sm:border-b-0',
+          ]}
+        >
+          <div class="eyebrow">{point.n}</div>
+          <div class="mt-1.5 font-serif text-[18px] text-maroon">{point.title}</div>
+        </div>
+      ))
+    }
+  </div>
+
+  {/* ========================= OUR APPROACH ========================= */}
+  <div class="mx-auto max-w-[880px] px-5 py-16 text-center sm:px-8 lg:px-12 lg:py-22">
+    <h2 class="eyebrow eyebrow-lg mb-5 font-sans">Our approach</h2>
+    <p
+      class="m-0 font-serif text-[clamp(21px,3.5vw,26px)] leading-[1.5] text-balance text-maroon"
+    >
+      At University Navigator, Inc. we provide professional educational consulting
+      designed to help students and their families navigate the college admissions
+      process with clarity, confidence, and purpose.
+    </p>
+    <p class="mx-auto mt-6 max-w-[68ch] text-[16px] leading-[1.65] sm:text-[17px]">
+      Drawing upon extensive experience in admissions strategy, academic planning, and
+      educational consulting, UNI provides personalized guidance to assist students in
+      making informed educational decisions and developing effective college admissions
+      strategies. Our mission is to equip every student with the knowledge, strategy, and
+      confidence necessary to pursue their educational goals through the professional
+      consulting services expressly included within their selected engagement.
+    </p>
+  </div>
+
+  {/* ========================= THE ROUTE BAND ========================= */}
+  <div class="bg-maroon px-5 py-16 sm:px-8 lg:px-12 lg:py-20">
+    <div
+      class="mx-auto grid max-w-[1240px] grid-cols-1 items-center gap-10 lg:grid-cols-[340px_1fr] lg:gap-18"
+    >
+      <Image
+        src={crest}
+        alt=""
+        width={600}
+        height={600}
+        densities={[1, 2]}
+        loading="lazy"
+        class="block h-auto w-[180px] justify-self-center sm:w-[240px] lg:w-[300px]"
+      />
+      <div>
+        <div class="eyebrow eyebrow-lg mb-[18px] text-gold">The route</div>
+        <h2
+          class="mb-7 max-w-[20ch] font-serif text-[clamp(26px,5vw,36px)] leading-[1.15] text-bg"
+        >
+          A plotted course from first plan to final decision
+        </h2>
+        <ol class="m-0 flex list-none flex-col p-0">
+          {
+            ROUTE_STEPS.map((step, index) => (
+              <li
+                class:list={[
+                  'flex flex-col gap-1.5 border-t border-rule-gold py-[15px] sm:flex-row sm:items-baseline sm:gap-[18px]',
+                  index === ROUTE_STEPS.length - 1 && 'border-b',
+                ]}
+              >
+                <span class="eyebrow w-8 shrink-0 text-gold">{step.n}</span>
+                <span class="flex-1 font-serif text-[19px] text-bg sm:text-[21px]">
+                  {step.title}
+                </span>
+                <span class="text-[14px] text-cream-muted">{step.detail}</span>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  {/* ========================= ENGAGEMENTS ========================= */}
+  <div class="mx-auto max-w-[1240px] px-5 py-16 sm:px-8 lg:px-12 lg:py-22">
+    <div class="eyebrow eyebrow-lg mb-3.5">Engagements</div>
+    <div class="mb-9 flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between">
+      <h2 class="m-0 font-serif text-[clamp(28px,5vw,40px)] text-maroon">
+        Two ways to work together
+      </h2>
+      <a href="/services" class="link-rule shrink-0 text-[15px]">
+        All services &amp; policies
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      {
+        [bundle, essay].map((entry) => {
+          const product = PRODUCTS[entry.data.slug];
+          return (
+            <a
+              href={`/services/${entry.data.slug}`}
+              class="card block p-7 no-underline transition-[transform,border-color] duration-150 hover:-translate-y-0.5 hover:border-gold sm:p-9"
+            >
+              <div class="eyebrow mb-3.5">{product.kind}</div>
+              <div class="mb-2.5 font-serif text-[24px] text-maroon sm:text-[28px]">
+                {entry.data.name}
+              </div>
+              <p class="mb-[22px] text-[15px] leading-[1.6] text-ink">
+                {entry.data.cardSummary}
+              </p>
+              <div class="flex items-baseline gap-2">
+                <span class="font-serif text-[28px] text-maroon sm:text-[32px]">
+                  {product.price}
+                </span>
+                <span class="text-[13px] text-ink-muted">{product.term}</span>
+              </div>
+            </a>
+          );
+        })
+      }
+    </div>
+  </div>
+
+  {/* ========================== FOUNDER ========================== */}
+  <div class="border-y border-rule">
+    <div
+      class="mx-auto grid max-w-[1240px] grid-cols-1 items-center gap-8 px-5 py-12 sm:px-8 lg:grid-cols-[420px_1fr] lg:gap-14 lg:px-12 lg:py-16"
+    >
+      <Image
+        src={founder}
+        alt="Sam Atherton at a USC recruiting table at a high school college fair"
+        width={840}
+        height={630}
+        densities={[1, 2]}
+        loading="lazy"
+        class="block h-auto w-full rounded-[6px]"
+      />
+      <div>
+        <div class="eyebrow eyebrow-lg mb-4">The founder</div>
+        <h2 class="mb-4 font-serif text-[clamp(26px,5vw,36px)] text-maroon">
+          Sam Atherton — Founder and President
+        </h2>
+        <p class="mb-3 max-w-[58ch] text-[16px] leading-[1.65] sm:text-[17px]">
+          Sam Atherton provides professional educational consulting to students and
+          families navigating the college admissions process — a professor at Mt. San
+          Antonio College and a USC recruiter, with degrees from USC, UC Berkeley, and
+          graduate studies at Harvard.
+        </p>
+        <p class="mb-6 text-[12px]">
+          <DraftFlag note="condensed from supplied bio" />
+        </p>
+        <a href="/about" class="link-rule text-[15px]">Full biography</a>
+      </div>
+    </div>
+  </div>
+
+  {/* ========================= CAMPUS TILES ========================= */}
+  <div class="mx-auto max-w-[1240px] px-5 pt-12 sm:px-8 lg:px-12 lg:pt-18">
+    <CampusTiles />
+  </div>
+
+  {/* =========================== CTA BAND =========================== */}
+  <div class="mx-auto max-w-[880px] px-5 py-16 text-center sm:px-8 lg:px-12 lg:py-22">
+    <h2 class="mb-4 font-serif text-[clamp(30px,6vw,42px)] text-maroon">
+      Start with a free consultation
+    </h2>
+    <p class="mx-auto mb-8 max-w-[60ch] text-[16px] leading-[1.65] sm:text-[17px]">
+      In 30 minutes we'll get to know your goals, answer your questions, and outline the
+      best path forward.
+    </p>
+    <a href="/book" class="btn-gold px-9 py-[18px] text-[16px]">
+      Book a free consultation
+    </a>
+  </div>
+</Base>

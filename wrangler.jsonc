@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "university-navigator",
+
+  // The adapter supplies the Worker entrypoint; Astro's build wires the compiled
+  // server bundle in behind it. Do not point this at a path inside dist/ — the
+  // Cloudflare Vite plugin resolves `main` before the build has produced anything.
+  "main": "@astrojs/cloudflare/entrypoints/server",
+
+  "compatibility_date": "2026-07-28",
+
+  // Required by the Stripe SDK, which reaches for Node built-ins.
+  "compatibility_flags": ["nodejs_compat"],
+
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS",
+    // Prerendered marketing pages are real files. Anything matching nothing
+    // should render our designed 404 rather than a bare Worker error.
+    "not_found_handling": "404-page"
+  },
+
+  "observability": { "enabled": true }
+
+  // Secrets are NOT declared here — they are uploaded with `wrangler secret put`
+  // (or set in the dashboard) and listed in .dev.vars.example. See README.md.
+}
