@@ -104,7 +104,7 @@ export default function CalEmbed({ calLink, phone, phoneHref, timeoutMs = 10000 
         </a>
       </div>
 
-      <div ref={wrapRef} className="relative h-[680px] w-full sm:h-[760px]">
+      <div ref={wrapRef} className="relative h-[820px] w-full md:h-[620px]">
         {state === 'loading' && (
           <p className="absolute inset-0 flex items-center justify-center text-[14px] text-ink-muted">
             Loading the scheduler…

@@ -41,57 +41,59 @@ const jsonLd = [
       primary content and rush is a secondary panel that links to its detail page
       to purchase. Rush is not a booking widget.
     */}
-    <div
-      class="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1fr_380px] lg:gap-12"
-    >
-      <div class="order-2 lg:order-1">
-        {/* client:load — the scheduler is the whole point of this page and sits
-            in the initial viewport. */}
-        <CalEmbed
-          client:load
-          calLink={calLink}
-          phone={SITE.phone}
-          phoneHref={SITE.phoneHref}
-        />
+    {/*
+      The scheduler runs full width rather than in a 1fr/380px split.
+
+      cal.com's month view is width-sensitive: below roughly 900px it collapses
+      into a single stacked column that clips and needs inner scrolling, and above
+      it renders the intended three-column layout (event details · calendar ·
+      times) in about half the height. The old sidebar was starving it of exactly
+      the width it needed, which is why the calendar looked broken. Supporting
+      panels moved underneath.
+    */}
+    <CalEmbed
+      client:load
+      calLink={calLink}
+      phone={SITE.phone}
+      phoneHref={SITE.phoneHref}
+    />
+
+    <div class="mt-8 grid grid-cols-1 items-start gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="rounded-[6px] border-[1.5px] border-gold bg-white p-6">
+        <div class="eyebrow mb-2">Free consultation</div>
+        <h2 class="mb-1.5 font-serif text-[22px] text-maroon">30 minutes, free</h2>
+        <p class="m-0 text-[14px] leading-[1.6] text-ink-soft">
+          Video (Zoom or Cal Video). No obligation.
+        </p>
       </div>
 
-      <aside class="order-1 flex flex-col gap-4 lg:order-2">
-        <div class="rounded-[6px] border-[1.5px] border-gold bg-white p-6">
-          <div class="eyebrow mb-2">Free consultation</div>
-          <h2 class="mb-1.5 font-serif text-[22px] text-maroon">30 minutes, free</h2>
-          <p class="m-0 text-[14px] leading-[1.6] text-ink-soft">
-            Video (Zoom or Cal Video). No obligation.
-          </p>
-        </div>
+      <div class="rounded-[6px] border border-rule p-6 text-[13px] leading-[1.6] text-ink-soft">
+        <div class="eyebrow mb-2">We'll ask when you book</div>
+        Student name · parent/guardian name · current school · graduation year · what
+        you'd most like to discuss
+      </div>
 
-        <div class="border-t border-rule pt-4.5 text-[13px] leading-[1.6] text-ink-soft">
-          <div class="eyebrow mb-2">We'll ask when you book</div>
-          Student name · parent/guardian name · current school · graduation year · what
-          you'd most like to discuss
-        </div>
-
-        {/* Rush — explanatory, not bookable. */}
-        <div class="rounded-[6px] border border-rule bg-[rgba(255,255,255,.5)] p-6">
-          <div class="eyebrow mb-2">Need a time outside our availability?</div>
-          <h2 class="mb-2 font-serif text-[20px] text-maroon">
-            Rush consultation — {rush.price}
-          </h2>
-          <p class="mb-4 text-[14px] leading-[1.6] text-ink-soft">
-            Covers meetings scheduled outside current availability, subject to limited
-            case-by-case availability. Paid at booking — purchase the rush fee and the
-            office will email you to arrange a time.
-          </p>
-          <a href="/services/rush-consultation" class="link-rule text-[14px]">
-            About rush consultations →
-          </a>
-        </div>
-
-        <div class="text-[13px] leading-[1.6] text-ink-muted">
-          Prefer to talk first? Call
-          <a href={SITE.phoneHref} class="font-semibold">{SITE.phone}</a> or
-          <a href="/contact">send us a message</a>.
-        </div>
-      </aside>
+      {/* Rush — explanatory, not bookable. */}
+      <div class="rounded-[6px] border border-rule bg-[rgba(255,255,255,.5)] p-6">
+        <div class="eyebrow mb-2">Need a time outside our availability?</div>
+        <h2 class="mb-2 font-serif text-[20px] text-maroon">
+          Rush consultation — {rush.price}
+        </h2>
+        <p class="mb-4 text-[14px] leading-[1.6] text-ink-soft">
+          Covers meetings scheduled outside current availability, subject to limited
+          case-by-case availability. Paid at booking — purchase the rush fee and the
+          office will email you to arrange a time.
+        </p>
+        <a href="/services/rush-consultation" class="link-rule text-[14px]">
+          About rush consultations →
+        </a>
+      </div>
     </div>
+
+    <p class="mt-6 text-[13px] leading-[1.6] text-ink-muted">
+      Prefer to talk first? Call
+      <a href={SITE.phoneHref} class="font-semibold">{SITE.phone}</a> or
+      <a href="/contact">send us a message</a>.
+    </p>
   </div>
 </Base>
