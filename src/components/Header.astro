@@ -61,7 +61,15 @@ const mobileLinks = [{ href: '/', label: 'Home' }, ...NAV_LINKS];
       }
     </nav>
 
-    <Compass client:idle bearing={deg} label={label} />
+    {/*
+      client:load, not client:idle. These are the header's interactive controls
+      and they must work from the first tap — the hamburger especially, since on
+      mobile it is the only navigation. client:idle waits for
+      requestIdleCallback, and the globe's continuous rAF loop means the page
+      never goes idle, so neither island ever hydrated: the menu button did
+      nothing and the compass needle never moved.
+    */}
+    <Compass client:load bearing={deg} label={label} />
 
     <a
       href="/book"
@@ -71,7 +79,7 @@ const mobileLinks = [{ href: '/', label: 'Home' }, ...NAV_LINKS];
     </a>
 
     <MobileNav
-      client:idle
+      client:load
       links={mobileLinks}
       crestSrc={crestImage.src}
       email={SITE.email}

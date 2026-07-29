@@ -174,6 +174,24 @@ export default function Globe({
       host.style.cursor = 'grab';
     };
 
+    /*
+     * Pause the loop when the globe scrolls out of view.
+     *
+     * A permanent 60fps rAF loop keeps the main thread busy forever, which
+     * starves requestIdleCallback — that is what stopped every client:idle
+     * island on the page from ever hydrating (the mobile menu button did
+     * nothing). The header islands moved to client:load, but a hero animation
+     * still has no business running while the visitor reads the footer.
+     */
+    let onScreen = true;
+    const visibility = new IntersectionObserver(
+      (entries) => {
+        onScreen = entries.some((e) => e.isIntersecting);
+      },
+      { rootMargin: '100px' }
+    );
+    visibility.observe(host);
+
     canvas.addEventListener('pointerdown', onPointerDown);
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', endDrag);
@@ -187,6 +205,8 @@ export default function Globe({
     const draw = () => {
       if (dead) return;
       frame = requestAnimationFrame(draw);
+      // Off-screen: keep the loop alive but skip all work.
+      if (!onScreen) return;
 
       // Intro progress: 0 → 1 over INTRO_MS, then pinned at 1 forever.
       const intro = introMs === 0 ? 1 : Math.min(1, (performance.now() - introStart) / introMs);
@@ -275,6 +295,7 @@ export default function Globe({
       clearTimeout(settleTimer);
       cancelAnimationFrame(frame);
       resizeObserver?.disconnect();
+      visibility.disconnect();
       canvas.removeEventListener('pointerdown', onPointerDown);
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', endDrag);
