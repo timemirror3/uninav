@@ -160,8 +160,16 @@
     text-rendering: optimizeLegibility;
   }
 
+  /* Tailwind's preflight sets `text-decoration: inherit` on anchors, which
+     strips the underline. Inline links then differ from body text by colour
+     alone — maroon #560F10 against ink #2E2B29 — which fails WCAG 1.4.1 (use of
+     colour) and is what Lighthouse flags as "links rely on color". Restore the
+     underline here; nav items, buttons and cards opt out with `no-underline`. */
   a {
     color: var(--color-maroon);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
   }
   a:hover {
     color: var(--color-maroon-link);

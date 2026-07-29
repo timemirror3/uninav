@@ -84,7 +84,7 @@ const WAYPOINTS = [
     {
       WAYPOINTS.map((point, index) => (
         <>
-          {index > 0 && <li class="text-gold" aria-hidden="true">→</li>}
+          {index > 0 && <li class="text-gold-dark" aria-hidden="true">→</li>}
           <li class={point.gold ? 'text-gold-dark' : 'text-maroon'}>{point.label}</li>
         </>
       ))

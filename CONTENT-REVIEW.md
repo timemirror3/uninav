@@ -276,3 +276,24 @@ keyed on `event.id`. Also noted in the README.
 - [ ] Five Stripe Prices created and the five `STRIPE_PRICE_*` values set — amounts
       matching `src/lib/products.ts` exactly
 - [ ] `grep -r "DRAFT COPY" dist/client/` returns nothing
+
+---
+
+## 6. Measured results (for the record)
+
+Lighthouse 12, desktop preset, against the production build: **99–100 across all
+four categories on every route except two**, both explained in README §
+"Measured quality" — `/book` best-practices (cal.com's own third-party cookies and
+an error caused by the placeholder cal link 404ing) and `/404` SEO (the
+intentional `noindex`).
+
+Accessibility is **100 on every route**. Getting there required two fixes beyond
+the design source, both noted in §4.1:
+
+- Gold `#D8A13A` was used for the numbered markers on the service detail pages and
+  the thank-you steps, where it sits on a light surface at **2.16:1**. Changed to
+  `gold-dark` `#8A6420` (5.00:1). Gold on maroon (6.17:1) is unchanged.
+- Tailwind's preflight sets `text-decoration: inherit` on anchors, which stripped
+  underlines from inline prose links. Those links then differed from body text by
+  colour alone — maroon against ink — failing WCAG 1.4.1. Underlines restored in
+  the base layer; navigation, buttons and cards opt out with `no-underline`.

@@ -66,49 +66,66 @@ export default function CalEmbed({
         const cal = await getCalApi();
         if (cancelled) return;
 
-        cal('ui', {
-          theme: 'light',
-          cssVarsPerTheme: {
-            light: {
-              'cal-brand': '#560F10',
-              'cal-text': '#2E2B29',
-              'cal-text-emphasis': '#560F10',
-              'cal-bg': '#ffffff',
-              'cal-bg-emphasis': '#F0DFB4',
-              'cal-border': 'rgba(86,15,16,.20)',
-              'cal-border-emphasis': '#D8A13A',
-            },
-            dark: {},
-          },
-          hideEventTypeDetails: false,
-          layout: 'month_view',
-        });
-
         cal('inline', {
           elementOrSelector: '#cal-inline',
           calLink,
           config: { layout: 'month_view' },
         });
 
-        // The API resolving does not guarantee the iframe painted. Treat "no
-        // iframe inside the container" as a failure once the timeout elapses.
-        timer = setTimeout(() => {
+        /*
+         * Theming has to wait for the iframe.
+         *
+         * `cal('ui', …)` posts a message into the embed iframe. Calling it
+         * straight after `cal('inline', …)` races iframe creation and throws
+         * "iframe doesn't exist. `createIframe` must be called before
+         * `doInIframe`" — which surfaced as a console error in the audit. Poll
+         * for the iframe instead, then theme it. The same poll doubles as the
+         * did-it-actually-render check that drives the fallback.
+         */
+        const started = Date.now();
+        const poll = () => {
           if (cancelled) return;
           const iframe = document.querySelector('#cal-inline iframe');
-          setState(iframe ? 'ready' : 'failed');
-        }, 1200);
+          if (iframe) {
+            cal('ui', {
+              theme: 'light',
+              cssVarsPerTheme: {
+                light: {
+                  'cal-brand': '#560F10',
+                  'cal-text': '#2E2B29',
+                  'cal-text-emphasis': '#560F10',
+                  'cal-bg': '#ffffff',
+                  'cal-bg-emphasis': '#F0DFB4',
+                  'cal-border': 'rgba(86,15,16,.20)',
+                  'cal-border-emphasis': '#D8A13A',
+                },
+                dark: {},
+              },
+              hideEventTypeDetails: false,
+              layout: 'month_view',
+            });
+            setState('ready');
+            return;
+          }
+          if (Date.now() - started > timeoutMs) {
+            setState('failed');
+            return;
+          }
+          timer = setTimeout(poll, 200);
+        };
+        poll();
       } catch {
         if (!cancelled) setState('failed');
       }
     }
 
-    // Hard ceiling: whatever happens, do not leave the visitor staring at a
-    // spinner. Show the fallback.
+    // Hard ceiling in case the dynamic import itself never settles — e.g. the
+    // script host is blocked outright. Never leave the visitor on a spinner.
     const hardTimeout = setTimeout(() => {
       if (cancelled) return;
       const iframe = document.querySelector('#cal-inline iframe');
       if (!iframe) setState('failed');
-    }, timeoutMs);
+    }, timeoutMs + 1000);
 
     void mount();
 

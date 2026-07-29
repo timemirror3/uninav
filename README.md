@@ -425,6 +425,58 @@ canonical tags, OG URLs, the sitemap and JSON-LD. Change it in that one place.
 
 ---
 
+## Measured quality
+
+Lighthouse 12, desktop preset, run against the **production build** served
+statically (not the dev server):
+
+| Route | Perf | A11y | Best practices | SEO |
+|---|---|---|---|---|
+| `/` | 99 | 100 | 100 | 100 |
+| `/services` | 100 | 100 | 100 | 100 |
+| `/services/essay-review` | 100 | 100 | 100 | 100 |
+| `/about` | 99 | 100 | 100 | 100 |
+| `/contact` | 99 | 100 | 100 | 100 |
+| `/inquiry` | 99 | 100 | 100 | 100 |
+| `/policies/scope` | 100 | 100 | 100 | 100 |
+| `/book` | 99 | 100 | **74** | 100 |
+| `/404` | 100 | 100 | 100 | **69** |
+
+Two scores are below 95 and both are explained, not outstanding work:
+
+- **`/book` best practices — 74.** Every deduction comes from cal.com's own
+  `embed.js`: its third-party cookies (`__cf_bm`, `__Secure-next-auth.*`) and a
+  console error. The console error is *"iframe doesn't exist"*, thrown because the
+  placeholder `PUBLIC_CAL_LINK` in this repo points at an event type that does not
+  exist yet — `cal.com/universitynavigator/free-consultation` currently returns
+  404. **Re-measure once the real event type is configured; that error should
+  disappear.** The third-party-cookie deduction will remain for as long as cal.com
+  is embedded, and is not fixable from this codebase.
+- **`/404` SEO — 69.** The single failing audit is `is-crawlable`, because the page
+  sets `noindex`. That is correct for a 404 and should not be "fixed".
+
+To reproduce:
+
+```bash
+npm run build
+npx http-server dist/client -p 8788 -s
+CHROME_PATH=$(which google-chrome) npx lighthouse@12 http://localhost:8788/ \
+  --preset=desktop --only-categories=performance,accessibility,best-practices,seo --view
+```
+
+Structural accessibility was additionally checked across all routes: exactly one
+`<h1>` per page, no heading-level jumps, every image with `alt`, every form control
+labelled, `main`/`header`/`footer` landmarks, `lang` set, and a working skip link.
+No horizontal overflow at 320 / 375 / 414px.
+
+**Contrast.** Three colour pairings inherited from the design source failed WCAG AA
+and were darkened — see `CONTENT-REVIEW.md` §4.1 for the measurements. In
+particular, **gold `#D8A13A` measures 2.16:1 on the page background and must never
+be used for text on a light surface.** Use `--color-gold-dark` (`#8A6420`, 5.00:1)
+there and keep gold for text on maroon (6.17:1).
+
+---
+
 ## Known gotchas
 
 **Stripe receipts look broken in test mode.** In test mode / sandbox, Stripe only
