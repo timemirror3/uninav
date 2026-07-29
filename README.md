@@ -395,6 +395,21 @@ URLs get the designed 404 rather than a bare Worker error.
 `dist/`. The Cloudflare Vite plugin resolves `main` before the build has produced
 anything, so a `dist/` path fails the build.
 
+**First deploy will provision a KV namespace.** The adapter enables Astro sessions
+by default and emits a `SESSION` KV binding with no id, so the first
+`wrangler deploy` creates that namespace (and may prompt for confirmation on an
+interactive terminal). This site never calls `Astro.session`, so the namespace
+stays empty — it is harmless, but if you are deploying from CI, run the first
+deploy interactively, or pre-create it and add the id to `wrangler.jsonc`:
+
+```bash
+npx wrangler kv namespace create SESSION
+```
+
+Verified with `npx wrangler deploy --dry-run`: 29 modules, ~1.08 MiB worker
+(507 KiB of that is the Stripe SDK), 387 KiB gzipped, plus 91 static assets — well
+inside the Workers size limit.
+
 Security headers, including a strict CSP allowing only what cal.com, Turnstile and
 Stripe Checkout need, live in `public/_headers`. Stripe.js is never loaded
 client-side, so `js.stripe.com` is deliberately absent from `script-src`. If you
