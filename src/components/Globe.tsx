@@ -83,138 +83,157 @@ export default function Globe({
     let frame = 0;
     let resizeObserver: ResizeObserver | undefined;
 
-    (async () => {
-      let land: GeoPermissibleObjects | null = null;
-      try {
-        const topo = (await fetch(landUrl).then((r) => r.json())) as Topology<{
-          land: GeometryCollection;
-        }>;
-        land = feature(topo, topo.objects.land) as unknown as GeoPermissibleObjects;
-      } catch {
-        // Graticule-only is still a legible globe; not worth failing over.
-      }
+    /*
+     * Everything needed to paint runs SYNCHRONOUSLY. The land topology is
+     * fetched afterwards and drops in when it arrives.
+     *
+     * This used to sit behind `await fetch(landUrl)`, which meant the canvas was
+     * not even sized until the network came back — and if the effect was torn
+     * down during that await, `dead` short-circuited the rest and the globe
+     * never started at all. In production it never started: the canvas stayed at
+     * its default 300x150, unpainted, while the 25 markers (rendered
+     * unconditionally) floated over the fallback route diagram. That is the
+     * "globe isn't showing" everyone saw.
+     *
+     * A sphere and graticule are a perfectly legible globe on their own, so
+     * there is no reason to block first paint on a 55KB download.
+     */
+    let land: GeoPermissibleObjects | null = null;
+
+    const graticule = geoGraticule10();
+    const projection = geoOrthographic().precision(0.2);
+    const path = geoPath(projection, ctx);
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    let rotation: [number, number] = [-20, -12];
+    let width = 0;
+    let height = 0;
+
+    const resize = () => {
+      width = host.clientWidth;
+      height = host.clientHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      projection.translate([width / 2, height / 2]).scale(Math.min(width, height) * 0.46);
+    };
+    resize();
+    resizeObserver = new ResizeObserver(resize);
+    resizeObserver.observe(host);
+
+    let dragging = false;
+    let last: [number, number] = [0, 0];
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.target !== canvas) return;
+      dragging = true;
+      last = [event.clientX, event.clientY];
+      host.style.cursor = 'grabbing';
+      canvas.setPointerCapture(event.pointerId);
+    };
+    const onPointerMove = (event: PointerEvent) => {
+      if (!dragging) return;
+      const k = 0.22;
+      rotation = [
+        rotation[0] + (event.clientX - last[0]) * k,
+        Math.max(-70, Math.min(70, rotation[1] - (event.clientY - last[1]) * k)),
+      ];
+      last = [event.clientX, event.clientY];
+    };
+    const endDrag = () => {
+      dragging = false;
+      host.style.cursor = 'grab';
+    };
+
+    canvas.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', endDrag);
+
+    setPhase('live');
+
+    const draw = () => {
       if (dead) return;
+      frame = requestAnimationFrame(draw);
 
-      const graticule = geoGraticule10();
-      const projection = geoOrthographic().precision(0.2);
-      const path = geoPath(projection, ctx);
-      const dpr = Math.min(2, window.devicePixelRatio || 1);
-      let rotation: [number, number] = [-20, -12];
-      let width = 0;
-      let height = 0;
+      const paused = dragging || hoveredRef.current !== null || activeRef.current !== null;
+      if (spin && !paused) rotation[0] += 0.055;
+      projection.rotate(rotation);
 
-      const resize = () => {
-        width = host.clientWidth;
-        height = host.clientHeight;
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        projection.translate([width / 2, height / 2]).scale(Math.min(width, height) * 0.46);
-      };
-      resize();
-      resizeObserver = new ResizeObserver(resize);
-      resizeObserver.observe(host);
+      ctx.clearRect(0, 0, width, height);
 
-      let dragging = false;
-      let last: [number, number] = [0, 0];
+      ctx.beginPath();
+      path({ type: 'Sphere' });
+      ctx.fillStyle = oceanColor;
+      ctx.fill();
 
-      const onPointerDown = (event: PointerEvent) => {
-        if (event.target !== canvas) return;
-        dragging = true;
-        last = [event.clientX, event.clientY];
-        host.style.cursor = 'grabbing';
-        canvas.setPointerCapture(event.pointerId);
-      };
-      const onPointerMove = (event: PointerEvent) => {
-        if (!dragging) return;
-        const k = 0.22;
-        rotation = [
-          rotation[0] + (event.clientX - last[0]) * k,
-          Math.max(-70, Math.min(70, rotation[1] - (event.clientY - last[1]) * k)),
-        ];
-        last = [event.clientX, event.clientY];
-      };
-      const endDrag = () => {
-        dragging = false;
-        host.style.cursor = 'grab';
-      };
+      ctx.beginPath();
+      path(graticule);
+      ctx.strokeStyle = 'rgba(86,15,16,.14)';
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
 
-      canvas.addEventListener('pointerdown', onPointerDown);
-      window.addEventListener('pointermove', onPointerMove);
-      window.addEventListener('pointerup', endDrag);
-      window.addEventListener('pointercancel', endDrag);
-
-      setPhase('live');
-
-      const draw = () => {
-        if (dead) return;
-        frame = requestAnimationFrame(draw);
-
-        const paused = dragging || hoveredRef.current !== null || activeRef.current !== null;
-        if (spin && !paused) rotation[0] += 0.055;
-        projection.rotate(rotation);
-
-        ctx.clearRect(0, 0, width, height);
-
+      if (land) {
         ctx.beginPath();
-        path({ type: 'Sphere' });
-        ctx.fillStyle = oceanColor;
+        path(land);
+        ctx.fillStyle = landColor;
         ctx.fill();
+      }
 
-        ctx.beginPath();
-        path(graticule);
-        ctx.strokeStyle = 'rgba(86,15,16,.14)';
-        ctx.lineWidth = 0.8;
-        ctx.stroke();
+      ctx.beginPath();
+      path({ type: 'Sphere' });
+      ctx.strokeStyle = '#D8A13A';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
 
-        if (land) {
-          ctx.beginPath();
-          path(land);
-          ctx.fillStyle = landColor;
-          ctx.fill();
+      const centre: [number, number] = [-rotation[0], -rotation[1]];
+      DESTINATIONS.forEach((destination, index) => {
+        const node = markerRefs.current[index];
+        if (!node) return;
+        const point = projection(destination.coord);
+        // Beyond a quarter turn the marker is on the far side of the sphere.
+        const onFace =
+          !!point && geoDistance(destination.coord, centre) < Math.PI / 2 - 0.02;
+
+        node.style.opacity = onFace ? '1' : '0';
+        node.style.pointerEvents = onFace ? 'auto' : 'none';
+        // Keep hidden markers out of the tab order.
+        node.tabIndex = onFace ? 0 : -1;
+        node.setAttribute('aria-hidden', onFace ? 'false' : 'true');
+        if (!point) return;
+        node.style.left = `${point[0]}px`;
+        node.style.top = `${point[1]}px`;
+
+        if (hoveredRef.current === destination && tooltipRef.current) {
+          tooltipRef.current.style.left = `${point[0]}px`;
+          tooltipRef.current.style.top = `${point[1] - 32}px`;
         }
+        if (activeRef.current === destination && cardRef.current) {
+          cardRef.current.style.left = `${Math.max(0, Math.min(point[0] + 16, width - 290))}px`;
+          cardRef.current.style.top = `${point[1] + 8}px`;
+        }
+      });
+    };
+    draw();
 
-        ctx.beginPath();
-        path({ type: 'Sphere' });
-        ctx.strokeStyle = '#D8A13A';
-        ctx.lineWidth = 1.2;
-        ctx.stroke();
-
-        const centre: [number, number] = [-rotation[0], -rotation[1]];
-        DESTINATIONS.forEach((destination, index) => {
-          const node = markerRefs.current[index];
-          if (!node) return;
-          const point = projection(destination.coord);
-          // Beyond a quarter turn the marker is on the far side of the sphere.
-          const onFace =
-            !!point && geoDistance(destination.coord, centre) < Math.PI / 2 - 0.02;
-
-          node.style.opacity = onFace ? '1' : '0';
-          node.style.pointerEvents = onFace ? 'auto' : 'none';
-          // Keep hidden markers out of the tab order.
-          node.tabIndex = onFace ? 0 : -1;
-          node.setAttribute('aria-hidden', onFace ? 'false' : 'true');
-          if (!point) return;
-          node.style.left = `${point[0]}px`;
-          node.style.top = `${point[1]}px`;
-
-          if (hoveredRef.current === destination && tooltipRef.current) {
-            tooltipRef.current.style.left = `${point[0]}px`;
-            tooltipRef.current.style.top = `${point[1] - 32}px`;
-          }
-          if (activeRef.current === destination && cardRef.current) {
-            cardRef.current.style.left = `${Math.max(0, Math.min(point[0] + 16, width - 290))}px`;
-            cardRef.current.style.top = `${point[1] + 8}px`;
-          }
-        });
-      };
-      draw();
-    })();
+      // Land arrives late and simply starts being drawn. A failure here leaves a
+      // sphere-and-graticule globe, which is still legible.
+      fetch(landUrl)
+        .then((r) => r.json())
+        .then((raw) => {
+          if (dead) return;
+          const topo = raw as Topology<{ land: GeometryCollection }>;
+          land = feature(topo, topo.objects.land) as unknown as GeoPermissibleObjects;
+        })
+      .catch(() => {});
 
     return () => {
       dead = true;
       cancelAnimationFrame(frame);
       resizeObserver?.disconnect();
+      canvas.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', endDrag);
+      window.removeEventListener('pointercancel', endDrag);
     };
   }, [landColor, oceanColor, spin]);
 
@@ -252,8 +271,12 @@ export default function Globe({
 
         <canvas ref={canvasRef} className="block h-full w-full" aria-hidden="true" />
 
+        {/* Markers only exist once the globe is actually painting. Rendering
+            them during `pending` put 25 pins on top of the fallback route
+            diagram, which is what the broken state looked like. */}
         <ul className="contents list-none">
-          {DESTINATIONS.map((destination, index) => (
+          {phase === 'live' &&
+            DESTINATIONS.map((destination, index) => (
             <li key={destination.name} className="contents">
               <button
                 ref={(el) => {
@@ -289,7 +312,7 @@ export default function Globe({
                 <span className="sr-only">{destination.name}</span>
               </button>
             </li>
-          ))}
+            ))}
         </ul>
 
         {/* Hover label */}

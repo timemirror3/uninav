@@ -104,7 +104,15 @@ const jsonLd = [professionalService(), founderPerson(), servicesItemList()];
       land topology loads, and what replaces the globe under
       prefers-reduced-motion.
     */}
-    <Globe client:visible>
+    {/*
+      client:load, not client:visible. The globe is the hero — it is in the
+      initial viewport on every load, so deferring to an IntersectionObserver
+      buys nothing, and in practice the observer did not fire at all: the island
+      stayed unhydrated, the canvas was never sized, and every visitor saw the
+      server-rendered fallback permanently. Lazy-hydrating something that is
+      always immediately visible was the wrong call.
+    */}
+    <Globe client:load>
       <HeroRoute />
     </Globe>
   </div>
