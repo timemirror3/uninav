@@ -378,13 +378,102 @@ school, first-generation status, U.S. military status. Accordingly:
 
 ---
 
+## Sandbox deploy — first run
+
+Getting a working test deployment, in order. Each step is a prerequisite for the
+next, so do not skip ahead.
+
+**1. Cloudflare**
+
+```bash
+npx wrangler login
+npm run deploy          # runs preflight, builds, deploys
+```
+
+The first deploy creates the `SESSION` KV namespace and gives you a
+`*.workers.dev` URL. The site will render immediately; forms and checkout will not
+work until the steps below.
+
+**2. Stripe (test mode)**
+
+Create the five Prices in **test mode** with the exact amounts in the table above,
+then set the secrets:
+
+```bash
+npx wrangler secret put STRIPE_SECRET_KEY            # sk_test_…
+npx wrangler secret put STRIPE_PRICE_ESSAY_REVIEW    # price_… (and the other four)
+```
+
+Add a webhook endpoint in the Stripe dashboard pointing at
+`https://<your-worker>.workers.dev/api/stripe-webhook`, subscribed to
+`checkout.session.completed`, then:
+
+```bash
+npx wrangler secret put STRIPE_WEBHOOK_SECRET        # the whsec_ from the DASHBOARD endpoint
+```
+
+Test card `4242 4242 4242 4242`, any future expiry, any CVC.
+
+**3. Resend — read this before testing purchase emails**
+
+Resend will only deliver to arbitrary recipients **after you verify a sending
+domain.** Until then it delivers only to the address you signed up with, and
+anything else fails silently.
+
+For sandbox, either verify `universitynavigator.org` in Resend, or:
+
+```bash
+npx wrangler secret put FROM_EMAIL          # "University Navigator <onboarding@resend.dev>"
+npx wrangler secret put INTERNAL_NOTIFY_EMAIL   # your own Resend signup address
+npx wrangler secret put RESEND_API_KEY
+```
+
+Separately: **in Stripe test mode, Stripe's own receipts only send to a verified
+sandbox email.** Receipts looking broken in test is expected — see § Known gotchas.
+
+**4. Turnstile**
+
+Create a widget in the Cloudflare dashboard with your `workers.dev` hostname (and
+later the real domain) in its allowed hostnames.
+
+```bash
+npx wrangler secret put TURNSTILE_SECRET_KEY
+```
+
+`PUBLIC_TURNSTILE_SITE_KEY` is **build-time** — put it in `.dev.vars` (or `.env`)
+and rebuild. A secret alone will not work.
+
+**5. cal.com**
+
+Create the free-consultation event type, then set `PUBLIC_CAL_LINK` in
+`.dev.vars`/`.env` and rebuild. Until the link resolves, `/book` shows the
+fallback panel — which is correct behaviour, not a bug.
+
+### The one thing that will bite you
+
+`.dev.vars` is fed into the **build**, so `PUBLIC_*` values in it ship to users.
+Running `npm run deploy` with the Turnstile *test* key in `.dev.vars`
+(`1x00000000000000000000AA`) publishes a site whose bot protection always passes,
+and nothing visibly breaks.
+
+`npm run deploy` runs `npm run preflight` first, which prints exactly what is about
+to be baked in and flags test credentials. It warns, never blocks — a sandbox
+deploy with test keys is legitimate. Run it any time:
+
+```bash
+npm run preflight
+```
+
+---
+
 ## Deploying
 
 ```bash
 npm run check      # must be clean
+npm run preflight  # what is about to be baked in
 npm run build
 npm run preview    # exercise it on the real workerd runtime
-npm run deploy
+npm run deploy     # preflight + build + wrangler deploy
 ```
 
 `wrangler.jsonc` sets `nodejs_compat` (the Stripe SDK needs it), an `assets`

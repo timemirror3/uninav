@@ -8,8 +8,9 @@
     "build": "astro build",
     "preview": "wrangler dev",
     "check": "astro check",
-    "deploy": "astro build && wrangler deploy",
-    "cf-typegen": "wrangler types"
+    "deploy": "node scripts/preflight.mjs && astro build && wrangler deploy",
+    "cf-typegen": "wrangler types",
+    "preflight": "node scripts/preflight.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.1.6",
