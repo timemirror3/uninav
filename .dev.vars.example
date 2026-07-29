@@ -49,7 +49,7 @@ PUBLIC_TURNSTILE_SITE_KEY="0x_replace_me"
 
 # --- cal.com --------------------------------------------------------------
 # The path after cal.com/ for the free consultation event type.
-PUBLIC_CAL_LINK="universitynavigator/free-consultation"
+PUBLIC_CAL_LINK="university-navigator-lb9xx8/30min"
 
 # --- Operations -----------------------------------------------------------
 # Hours within which the office commits to emailing a rush purchaser to

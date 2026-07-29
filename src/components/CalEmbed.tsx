@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 
 interface Props {
-  /** cal.com link, e.g. "universitynavigator/free-consultation". */
+  /** cal.com link, e.g. "university-navigator-lb9xx8/30min". */
   calLink: string;
   phone: string;
   phoneHref: string;
-  /** Milliseconds before the fallback replaces the embed. */
+  /** Milliseconds to wait for the iframe to load before showing the fallback. */
   timeoutMs?: number;
 }
 
@@ -14,29 +14,39 @@ type State = 'loading' | 'ready' | 'failed';
 /**
  * cal.com inline embed for the free consultation — the only bookable event type.
  *
- * The fallback below is real defensive UI, not prototype scaffolding: if the
- * embed script is blocked (privacy extensions block cal.com fairly often), fails
- * to load, or simply never renders, the visitor still gets a working path to a
- * booking. The prototype's fallback copy is preserved verbatim.
+ * Deliberately a plain <iframe> rather than @calcom/embed-react.
  *
- * The embed script is loaded lazily on first intersection so it costs nothing on
- * routes that never scroll to it.
+ * Their embed script (both the imperative `cal('inline', …)` API and the <Cal>
+ * component) throws an uncaught "iframe doesn't exist. `createIframe` must be
+ * called before `doInIframe`" from inside embed.js on every load here. That
+ * error left the React island wedged — it never finished hydrating, so the
+ * scheduler sat on "Loading…" forever and even the fallback never fired. An
+ * iframe has no such lifecycle to race: it either loads or it doesn't.
+ *
+ * What we give up is auto-height (the container is a fixed height instead) and
+ * script-level theming (passed as URL params). Both are cheap next to a booking
+ * page that reliably works.
+ *
+ * The fallback below is real defensive UI, not scaffolding: privacy extensions
+ * block cal.com fairly often. Its copy is the prototype's, verbatim.
  */
-export default function CalEmbed({
-  calLink,
-  phone,
-  phoneHref,
-  timeoutMs = 8000,
-}: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
+export default function CalEmbed({ calLink, phone, phoneHref, timeoutMs = 10000 }: Props) {
   const [state, setState] = useState<State>('loading');
   const [visible, setVisible] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
 
   const bookingUrl = `https://cal.com/${calLink}`;
+  /*
+   * Point at the canonical /embed path rather than `?embed=true` on the booking
+   * page: the latter 302s to app.cal.com and drops the query string on the way,
+   * which silently lost `theme=light` and rendered a dark scheduler on a cream
+   * page. Theming rides on the URL since there is no script to configure.
+   */
+  const embedUrl = `${bookingUrl}/embed?theme=light&layout=month_view&brandColor=%23560F10`;
 
-  // Only start loading once the embed is close to the viewport.
+  // Defer the iframe until it is near the viewport.
   useEffect(() => {
-    const node = containerRef.current;
+    const node = wrapRef.current;
     if (!node) return;
     if (typeof IntersectionObserver === 'undefined') {
       setVisible(true);
@@ -44,97 +54,23 @@ export default function CalEmbed({
     }
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
+        if (entries.some((e) => e.isIntersecting)) {
           setVisible(true);
           observer.disconnect();
         }
       },
-      { rootMargin: '200px' }
+      { rootMargin: '250px' }
     );
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
 
+  // If it never loads, show the fallback rather than an endless spinner.
   useEffect(() => {
-    if (!visible || !calLink) return;
-    let cancelled = false;
-    let timer: ReturnType<typeof setTimeout> | null = null;
-
-    async function mount() {
-      try {
-        const { getCalApi } = await import('@calcom/embed-react');
-        const cal = await getCalApi();
-        if (cancelled) return;
-
-        cal('inline', {
-          elementOrSelector: '#cal-inline',
-          calLink,
-          config: { layout: 'month_view' },
-        });
-
-        /*
-         * Theming has to wait for the iframe.
-         *
-         * `cal('ui', …)` posts a message into the embed iframe. Calling it
-         * straight after `cal('inline', …)` races iframe creation and throws
-         * "iframe doesn't exist. `createIframe` must be called before
-         * `doInIframe`" — which surfaced as a console error in the audit. Poll
-         * for the iframe instead, then theme it. The same poll doubles as the
-         * did-it-actually-render check that drives the fallback.
-         */
-        const started = Date.now();
-        const poll = () => {
-          if (cancelled) return;
-          const iframe = document.querySelector('#cal-inline iframe');
-          if (iframe) {
-            cal('ui', {
-              theme: 'light',
-              cssVarsPerTheme: {
-                light: {
-                  'cal-brand': '#560F10',
-                  'cal-text': '#2E2B29',
-                  'cal-text-emphasis': '#560F10',
-                  'cal-bg': '#ffffff',
-                  'cal-bg-emphasis': '#F0DFB4',
-                  'cal-border': 'rgba(86,15,16,.20)',
-                  'cal-border-emphasis': '#D8A13A',
-                },
-                dark: {},
-              },
-              hideEventTypeDetails: false,
-              layout: 'month_view',
-            });
-            setState('ready');
-            return;
-          }
-          if (Date.now() - started > timeoutMs) {
-            setState('failed');
-            return;
-          }
-          timer = setTimeout(poll, 200);
-        };
-        poll();
-      } catch {
-        if (!cancelled) setState('failed');
-      }
-    }
-
-    // Hard ceiling in case the dynamic import itself never settles — e.g. the
-    // script host is blocked outright. Never leave the visitor on a spinner.
-    const hardTimeout = setTimeout(() => {
-      if (cancelled) return;
-      const iframe = document.querySelector('#cal-inline iframe');
-      if (!iframe) setState('failed');
-    }, timeoutMs + 1000);
-
-    void mount();
-
-    return () => {
-      cancelled = true;
-      if (timer) clearTimeout(timer);
-      clearTimeout(hardTimeout);
-    };
-  }, [visible, calLink, timeoutMs]);
+    if (!visible || state !== 'loading') return;
+    const timer = setTimeout(() => setState((s) => (s === 'loading' ? 'failed' : s)), timeoutMs);
+    return () => clearTimeout(timer);
+  }, [visible, state, timeoutMs]);
 
   if (!calLink || state === 'failed') {
     return (
@@ -156,7 +92,7 @@ export default function CalEmbed({
             rel="noopener"
             className="btn-primary px-6 py-3.5 text-[14px]"
           >
-            Open cal.com/{calLink} ↗
+            Open our booking page ↗
           </a>
           <a href={phoneHref} className="btn-outline px-6 py-3.5 text-[14px]">
             {phone}
@@ -167,10 +103,7 @@ export default function CalEmbed({
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="overflow-hidden rounded-[6px] border border-rule bg-white"
-    >
+    <div className="overflow-hidden rounded-[6px] border border-rule bg-white">
       <div className="flex items-center justify-between border-b border-[rgba(86,15,16,.1)] px-5 py-3.5">
         <span className="eyebrow">Free consultation — 30 min</span>
         <a href={bookingUrl} target="_blank" rel="noopener" className="text-[13px]">
@@ -178,17 +111,25 @@ export default function CalEmbed({
         </a>
       </div>
 
-      {state === 'loading' && (
-        <p className="px-5 py-16 text-center text-[14px] text-ink-muted">
-          Loading the scheduler…
-        </p>
-      )}
-
-      <div
-        id="cal-inline"
-        style={{ minHeight: state === 'ready' ? '600px' : 0 }}
-        className="w-full overflow-hidden"
-      />
+      <div ref={wrapRef} className="relative h-[680px] w-full sm:h-[760px]">
+        {state === 'loading' && (
+          <p className="absolute inset-0 flex items-center justify-center text-[14px] text-ink-muted">
+            Loading the scheduler…
+          </p>
+        )}
+        {visible && (
+          <iframe
+            src={embedUrl}
+            title="Book a free consultation with University Navigator"
+            className="h-full w-full border-0"
+            loading="lazy"
+            onLoad={() => setState('ready')}
+            onError={() => setState('failed')}
+            // Only what the booking flow needs.
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+          />
+        )}
+      </div>
     </div>
   );
 }

@@ -18,14 +18,16 @@
     "@astrojs/mdx": "^7.0.5",
     "@astrojs/react": "^6.0.2",
     "@astrojs/sitemap": "^3.7.3",
-    "@calcom/embed-react": "^1.5.3",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.1.5",
+    "d3-geo": "^3.1.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "resend": "^6.18.1",
     "stripe": "^22.3.2",
     "tailwindcss": "^4.3.3",
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2",
     "zod": "^4.4.3"
   },
   "allowScripts": {
@@ -34,8 +36,10 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@types/d3-geo": "^3.1.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "@types/topojson-client": "^3.1.5",
     "sharp": "^0.35.3",
     "typescript": "^6.0.3",
     "wrangler": "^4.115.0"

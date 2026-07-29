@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import HeroRoute from '../components/HeroRoute.astro';
+import Globe from '../components/Globe.tsx';
 import CampusTiles from '../components/CampusTiles.astro';
 import DraftFlag from '../components/DraftFlag.astro';
 import crest from '../assets/crest-logo.png';
@@ -96,7 +97,16 @@ const jsonLd = [professionalService(), founderPerson(), servicesItemList()];
       </p>
     </div>
 
-    <HeroRoute />
+    {/*
+      The globe occupies the same 680×470 slot the route diagram did, so nothing
+      above or below it moves. HeroRoute is slotted in as its fallback: it is
+      server-rendered, so it is what no-JS visitors get, what shows while the
+      land topology loads, and what replaces the globe under
+      prefers-reduced-motion.
+    */}
+    <Globe client:visible>
+      <HeroRoute />
+    </Globe>
   </div>
 
   {/* ========================== WAYPOINTS ========================== */}

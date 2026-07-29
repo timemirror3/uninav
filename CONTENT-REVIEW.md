@@ -200,6 +200,36 @@ primary content and rush is a secondary explanatory panel linking to
 `/services/rush-consultation`. The embed-failure fallback copy is preserved
 verbatim. Some connective copy in the rush panel is new — voice-check.
 
+### 3.8 Home-page globe — 25 named universities · **needs owner + counsel**
+
+The hero's dotted route diagram has been replaced with an interactive globe
+plotting **25 named institutions** — MIT, Stanford, Harvard, Oxford, Cambridge,
+the Ivies, Tsinghua, Tokyo, and others — each with a descriptive card.
+
+This is the single largest new claim surface added to the site. An admissions
+consultancy naming 25 selective universities on its home page invites precisely
+the inference the Scope of Services policy disclaims:
+
+> "Admission to any college or university cannot be guaranteed."
+
+The build mitigates it the same way the campus photography is mitigated, with a
+disclaimer directly beneath the globe:
+
+> "Institutions shown are illustrative of where students apply — not a claim of
+> affiliation, placement, or admission."
+
+**Action:**
+1. Confirm the disclaimer wording with counsel — it is doing more work here than
+   the photography disclaimer does.
+2. Confirm the institution list itself is acceptable. If any of these have not
+   actually been applied to by clients, consider trimming: an aspirational list
+   is defensible, an invented track record is not.
+3. Note the descriptive text for each institution is generic encyclopedic copy
+   from the design source, not written by the firm. It makes no claim about UNI,
+   but it has not been reviewed.
+
+**Location:** `src/lib/destinations.ts`, `src/components/Globe.tsx`.
+
 ---
 
 ## 4. Decisions taken during the build
@@ -273,6 +303,7 @@ keyed on `event.id`. Also noted in the README.
 - [ ] §3.3 the rush full-refund sentence confirmed **or removed**
 - [ ] §3.4 `RUSH_RESPONSE_HOURS` confirmed as achievable
 - [ ] §3.1 subprocessor list confirmed complete
+- [ ] §3.8 globe institution list and disclaimer approved by counsel
 - [ ] Five Stripe Prices created and the five `STRIPE_PRICE_*` values set — amounts
       matching `src/lib/products.ts` exactly
 - [ ] `grep -r "DRAFT COPY" dist/client/` returns nothing
