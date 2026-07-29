@@ -22,7 +22,16 @@ export default defineConfig({
     imageService: 'compile',
   }),
 
-  integrations: [react(), mdx(), sitemap()],
+  integrations: [
+    react(),
+    mdx(),
+    sitemap({
+      // Per-transaction pages with no standalone value in an index.
+      filter: (page) => !page.includes('/thank-you') && !page.includes('/checkout/'),
+      changefreq: 'monthly',
+      priority: 0.7,
+    }),
+  ],
 
   image: {
     // Only local assets are used; no remote image domains are allowed.

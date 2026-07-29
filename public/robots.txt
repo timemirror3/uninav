@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Nothing here is secret, but these are per-transaction pages with no standalone
+# value in an index, and /api/* returns JSON only.
+Disallow: /thank-you
+Disallow: /checkout/
+Disallow: /api/
+
+Sitemap: https://universitynavigator.org/sitemap-index.xml

@@ -1,0 +1,58 @@
+# ---------------------------------------------------------------------------
+# Local development secrets.
+#
+# Copy to `.dev.vars` (git-ignored) and fill in. In production these are NOT set
+# here — upload them with `wrangler secret put NAME` or via the Cloudflare
+# dashboard. See README.md § Secrets.
+# ---------------------------------------------------------------------------
+
+# --- Stripe ---------------------------------------------------------------
+# Test-mode key while developing (sk_test_...). Live key is sk_live_...
+STRIPE_SECRET_KEY="sk_test_replace_me"
+
+# Printed by `stripe listen --forward-to localhost:4321/api/stripe-webhook`.
+# The dashboard-registered endpoint has a DIFFERENT secret — do not mix them up.
+STRIPE_WEBHOOK_SECRET="whsec_replace_me"
+
+# Price IDs (price_..., NOT product IDs prod_...). Create these in Stripe with
+# the exact amounts below; the site displays these figures from src/lib/products.ts
+# and a mismatch is a consumer-protection problem, not a cosmetic one.
+STRIPE_PRICE_COUNSELING_BUNDLE="price_replace_me"   # $2,750.00 recurring, every 3 months
+STRIPE_PRICE_ESSAY_REVIEW="price_replace_me"        # $300.00 one-time
+STRIPE_PRICE_ESSAY_REVIEWS_5="price_replace_me"     # $775.00 one-time
+STRIPE_PRICE_ZOOM_FOLLOWUPS_5="price_replace_me"    # $725.00 one-time
+STRIPE_PRICE_RUSH_CONSULTATION="price_replace_me"   # $100.00 one-time
+
+# Customer Portal login link (Stripe Dashboard → Settings → Billing → Customer
+# portal → "Login link"). Included in the bundle welcome email so cancellation
+# and card updates do not become a manual email to the office.
+STRIPE_PORTAL_URL="https://billing.stripe.com/p/login/replace_me"
+
+# --- Email ----------------------------------------------------------------
+RESEND_API_KEY="re_replace_me"
+
+# Verified sending identity on your Resend domain.
+FROM_EMAIL="University Navigator, Inc. <info@universitynavigator.org>"
+
+# Where purchase and form notifications land. This is the handoff to the person
+# who does the scheduling. Defaults to info@universitynavigator.org if unset.
+INTERNAL_NOTIFY_EMAIL="info@universitynavigator.org"
+
+# --- Turnstile ------------------------------------------------------------
+# Cloudflare dashboard → Turnstile → your widget.
+TURNSTILE_SECRET_KEY="0x_replace_me"
+PUBLIC_TURNSTILE_SITE_KEY="0x_replace_me"
+
+# Cloudflare's always-pass test pair, handy for local work:
+#   PUBLIC_TURNSTILE_SITE_KEY="1x00000000000000000000AA"
+#   TURNSTILE_SECRET_KEY="1x0000000000000000000000000000000AA"
+
+# --- cal.com --------------------------------------------------------------
+# The path after cal.com/ for the free consultation event type.
+PUBLIC_CAL_LINK="universitynavigator/free-consultation"
+
+# --- Operations -----------------------------------------------------------
+# Hours within which the office commits to emailing a rush purchaser to
+# schedule. Stated verbatim on the rush thank-you page and in its welcome email.
+# Changeable without a redeploy. Defaults to 24.
+RUSH_RESPONSE_HOURS="24"
