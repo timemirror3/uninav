@@ -1,12 +1,15 @@
-import type { APIContext } from 'astro';
+import { env as workerEnv } from 'cloudflare:workers';
 
 /**
  * Typed accessor for runtime secrets.
  *
- * On Workers, secrets arrive on `locals.runtime.env`, not `process.env` or
- * `import.meta.env`. In `astro dev` they come from `.dev.vars` via the platform
- * proxy. This resolves both, so route code never has to care which it is running
- * under.
+ * Astro 6 removed `Astro.locals.runtime.env`; the supported access path is now
+ * the `cloudflare:workers` virtual module, which works both in `astro dev` (via
+ * the Cloudflare Vite plugin, reading `.dev.vars`) and on the deployed Worker.
+ *
+ * Only import this from code that runs on the server — modules with
+ * `prerender = false` and the API routes. `cloudflare:workers` does not exist
+ * during the prerender pass.
  */
 export interface Env {
   STRIPE_SECRET_KEY?: string;
@@ -27,16 +30,20 @@ export interface Env {
   [key: string]: string | undefined;
 }
 
-export function getEnv(context: APIContext | { locals: App.Locals }): Env {
-  const runtimeEnv =
-    (context.locals as { runtime?: { env?: Record<string, unknown> } }).runtime?.env ?? {};
-
-  // import.meta.env carries build-time values (and .env in dev); runtime env
-  // wins because that is where deployed secrets live.
-  return { ...(import.meta.env as unknown as Env), ...(runtimeEnv as Env) };
+export function getEnv(): Env {
+  // import.meta.env carries build-time and .env values; the Worker env wins
+  // because that is where deployed secrets live.
+  // `wrangler types` generates Cloudflare.Env with every key as a required
+  // string. At runtime a secret can genuinely be absent — an unset variable in a
+  // fresh environment — so the local Env type keeps them optional and the cast
+  // goes through `unknown`.
+  return {
+    ...(import.meta.env as unknown as Env),
+    ...((workerEnv ?? {}) as unknown as Env),
+  };
 }
 
-/** Read a required secret, throwing a clear error naming the missing key. */
+/** Read a required secret, throwing an error that names the missing key. */
 export function requireEnv(env: Env, key: keyof Env & string): string {
   const value = env[key];
   if (!value) {

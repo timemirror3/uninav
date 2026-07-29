@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import type Stripe from 'stripe';
-import { getEnv, requireEnv } from '../../lib/env';
+import { getEnv, requireEnv, type Env } from '../../lib/env';
 import { formatAmount, stripeClient } from '../../lib/stripe';
 import { getProduct, rushResponseHours } from '../../lib/products';
 import {
@@ -38,7 +38,7 @@ function alreadyHandled(eventId: string): boolean {
 }
 
 export const POST: APIRoute = async (context) => {
-  const env = getEnv(context);
+  const env = getEnv();
 
   const signature = context.request.headers.get('stripe-signature');
   if (!signature) {
@@ -99,7 +99,7 @@ export const POST: APIRoute = async (context) => {
 };
 
 async function handleCompletedSession(
-  env: ReturnType<typeof getEnv>,
+  env: Env,
   session: Stripe.Checkout.Session
 ): Promise<void> {
   const metadata = session.metadata ?? {};

@@ -22,7 +22,7 @@ export const prerender = false;
  * Accepts both a form POST (the purchase rail's no-JS path) and JSON.
  */
 export const POST: APIRoute = async (context) => {
-  const env = getEnv(context);
+  const env = getEnv();
 
   let raw: Record<string, unknown>;
   const contentType = context.request.headers.get('content-type') ?? '';

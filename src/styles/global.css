@@ -304,6 +304,20 @@
     border-radius: var(--radius-card);
   }
 
+  /* The Turnstile widget renders at a fixed 300px minimum, which overflows a
+     padded card on a 320px screen. Scale it down there rather than letting the
+     page scroll sideways. */
+  .turnstile-wrap {
+    max-width: 100%;
+  }
+  @media (max-width: 380px) {
+    .turnstile-wrap {
+      transform: scale(0.82);
+      transform-origin: left top;
+      height: 54px;
+    }
+  }
+
   /* Long-form policy and service prose. */
   .prose-uni {
     font-size: 17.5px;

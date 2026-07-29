@@ -14,7 +14,7 @@ export const prerender = false;
  * absence of the submitted payload in every error path below.
  */
 export const POST: APIRoute = async (context) => {
-  const env = getEnv(context);
+  const env = getEnv();
 
   let payload: unknown;
   try {

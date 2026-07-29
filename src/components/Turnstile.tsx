@@ -113,5 +113,8 @@ export default function Turnstile({ siteKey, onToken, theme = 'light', action }:
     return null;
   }
 
-  return <div ref={containerRef} id={fallbackId} className="mt-4" />;
+  // `turnstile-wrap` scales the widget down on very narrow screens. Turnstile
+  // renders at a fixed 300px minimum, which overflows a padded card at 320px —
+  // see the max-width rule in global.css.
+  return <div ref={containerRef} id={fallbackId} className="turnstile-wrap mt-4" />;
 }

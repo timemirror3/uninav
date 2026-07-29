@@ -22,7 +22,7 @@ export const prerender = false;
  *     is visible as separate
  */
 export const POST: APIRoute = async (context) => {
-  const env = getEnv(context);
+  const env = getEnv();
 
   let payload: unknown;
   try {

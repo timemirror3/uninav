@@ -14,7 +14,7 @@ export const prerender = false;
  * show that it was given separately.
  */
 export const POST: APIRoute = async (context) => {
-  const env = getEnv(context);
+  const env = getEnv();
 
   let payload: unknown;
   try {

@@ -17,7 +17,7 @@ export const prerender = false;
  * its own it proves nothing, so it is never trusted to decide what this page
  * says.
  */
-const env = getEnv(Astro);
+const env = getEnv();
 const sessionId = Astro.url.searchParams.get('session_id');
 
 let session: Stripe.Checkout.Session | null = null;
