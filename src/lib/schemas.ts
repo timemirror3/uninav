@@ -13,11 +13,10 @@ const shortText = z.string().trim().max(200);
 const optionalShortText = shortText.optional().or(z.literal(''));
 
 export const emailField = z
-  .string()
+  .email('Enter a valid email address')
   .trim()
   .min(1, 'Email is required')
-  .max(254)
-  .email('Enter a valid email address');
+  .max(254);
 
 export const turnstileField = z.string().min(1, 'Verification is required').max(4096);
 
@@ -105,9 +104,9 @@ export const inquiryStep4 = z.object({
 });
 
 export const inquirySchema = inquiryStep1
-  .merge(inquiryStep2)
-  .merge(inquiryStep3)
-  .merge(inquiryStep4)
+  .extend(inquiryStep2.shape)
+  .extend(inquiryStep3.shape)
+  .extend(inquiryStep4.shape)
   .extend({ turnstileToken: turnstileField });
 
 export type InquiryInput = z.infer<typeof inquirySchema>;
@@ -140,7 +139,7 @@ export const checkoutSchema = z.object({
   /** Must be true — the refund-policy gate. */
   refundAck: z.literal(true),
   /** ISO timestamp of the acknowledgement, recorded as chargeback evidence. */
-  refundAckAt: z.string().datetime(),
+  refundAckAt: z.iso.datetime(),
   email: emailField.optional().or(z.literal('')),
 });
 

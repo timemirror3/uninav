@@ -1,0 +1,53 @@
+---
+import Base from '../layouts/Base.astro';
+import { NAV_LINKS, SITE } from '../lib/site';
+
+export const prerender = true;
+---
+
+<Base
+  title="Page not found"
+  description="That page isn't on the map. Head back to the home page or explore our services."
+  noindex
+>
+  <div class="mx-auto max-w-[720px] px-5 py-20 text-center sm:px-8 lg:px-12 lg:py-28">
+    <div class="eyebrow eyebrow-lg mb-5">Error 404</div>
+    <h1 class="mb-5 font-serif text-[clamp(34px,8vw,56px)] leading-[1.06] text-maroon">
+      That page isn't on the map
+    </h1>
+    <p class="mx-auto mb-10 max-w-[48ch] text-[16px] leading-[1.65] sm:text-[17px]">
+      The page you're looking for has moved or never existed. Let's get you back on
+      course.
+    </p>
+
+    <div class="mb-12 flex flex-wrap items-center justify-center gap-4">
+      <a href="/" class="btn-primary px-7 py-4 text-[15px]">Back to home</a>
+      <a href="/book" class="link-rule text-[15px]">Book a free consultation</a>
+    </div>
+
+    <nav
+      aria-label="Suggested pages"
+      class="border-t border-rule pt-8 text-left sm:text-center"
+    >
+      <div class="eyebrow mb-4">Try one of these</div>
+      <ul
+        class="flex list-none flex-col items-start gap-3 p-0 text-[15px] sm:flex-row sm:justify-center sm:gap-7"
+      >
+        {
+          NAV_LINKS.map((link) => (
+            <li>
+              <a href={link.href}>{link.label}</a>
+            </li>
+          ))
+        }
+        <li><a href="/inquiry">Request for Information</a></li>
+        <li><a href="/policies/refunds">Policies</a></li>
+      </ul>
+    </nav>
+
+    <p class="mt-10 text-[13px] text-ink-muted">
+      Still stuck? Email <a href={`mailto:${SITE.email}`}>{SITE.email}</a> or call
+      <a href={SITE.phoneHref}>{SITE.phone}</a>.
+    </p>
+  </div>
+</Base>

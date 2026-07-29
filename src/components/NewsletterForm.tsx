@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import Turnstile from './Turnstile';
 import { newsletterSchema } from '../lib/schemas';
 
@@ -22,7 +22,7 @@ export default function NewsletterForm({ turnstileSiteKey }: Props) {
   const [status, setStatus] = useState<Status>('idle');
   const [resetKey, setResetKey] = useState(0);
 
-  async function onSubmit(event: React.FormEvent) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (status === 'pending') return;
 

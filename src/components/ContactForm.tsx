@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import Turnstile from './Turnstile';
 import { contactSchema, fieldErrors } from '../lib/schemas';
 
@@ -29,7 +29,7 @@ export default function ContactForm({ turnstileSiteKey, phone, phoneHref }: Prop
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
   }
 
-  async function onSubmit(event: React.FormEvent) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (status === 'pending') return;
 

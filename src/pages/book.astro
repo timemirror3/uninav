@@ -1,0 +1,95 @@
+---
+import Base from '../layouts/Base.astro';
+import CalEmbed from '../components/CalEmbed.tsx';
+import { PRODUCTS } from '../lib/products';
+import { SITE } from '../lib/site';
+import { breadcrumbs, professionalService } from '../lib/jsonld';
+
+export const prerender = true;
+
+const calLink = import.meta.env['PUBLIC_CAL_LINK'] ?? '';
+const rush = PRODUCTS['rush-consultation'];
+
+const jsonLd = [
+  professionalService(),
+  breadcrumbs([
+    { name: 'Home', path: '/' },
+    { name: 'Book', path: '/book' },
+  ]),
+];
+---
+
+<Base
+  title="Book a consultation"
+  description="Schedule your free 30-minute consultation. We'll get to know your goals, answer your questions, and outline the best path forward."
+  jsonLd={jsonLd}
+>
+  <div class="mx-auto max-w-[1240px] px-5 py-12 sm:px-8 lg:px-12 lg:py-18">
+    <div class="eyebrow eyebrow-lg mb-4">Book</div>
+    <h1 class="mb-5 font-serif text-[clamp(34px,7vw,50px)] text-maroon">
+      Schedule a consultation
+    </h1>
+    <p class="mb-11 max-w-[64ch] text-[16px] leading-[1.65] sm:text-[17px]">
+      Schedule your free consultation today and let's talk about how we can support your
+      journey. In 30 minutes we'll get to know your goals, answer your questions, and
+      outline the best path forward.
+    </p>
+
+    {/*
+      The prototype had a two-card EVENT TYPE selector (01 free / 02 rush). With
+      only one bookable event type that selector is wrong, so the embed is the
+      primary content and rush is a secondary panel that links to its detail page
+      to purchase. Rush is not a booking widget.
+    */}
+    <div
+      class="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1fr_380px] lg:gap-12"
+    >
+      <div class="order-2 lg:order-1">
+        <CalEmbed
+          client:visible
+          calLink={calLink}
+          phone={SITE.phone}
+          phoneHref={SITE.phoneHref}
+        />
+      </div>
+
+      <aside class="order-1 flex flex-col gap-4 lg:order-2">
+        <div class="rounded-[6px] border-[1.5px] border-gold bg-white p-6">
+          <div class="eyebrow mb-2">Free consultation</div>
+          <h2 class="mb-1.5 font-serif text-[22px] text-maroon">30 minutes, free</h2>
+          <p class="m-0 text-[14px] leading-[1.6] text-ink-soft">
+            Video (Zoom or Cal Video). No obligation.
+          </p>
+        </div>
+
+        <div class="border-t border-rule pt-4.5 text-[13px] leading-[1.6] text-ink-soft">
+          <div class="eyebrow mb-2">We'll ask when you book</div>
+          Student name · parent/guardian name · current school · graduation year · what
+          you'd most like to discuss
+        </div>
+
+        {/* Rush — explanatory, not bookable. */}
+        <div class="rounded-[6px] border border-rule bg-[rgba(255,255,255,.5)] p-6">
+          <div class="eyebrow mb-2">Need a time outside our availability?</div>
+          <h2 class="mb-2 font-serif text-[20px] text-maroon">
+            Rush consultation — {rush.price}
+          </h2>
+          <p class="mb-4 text-[14px] leading-[1.6] text-ink-soft">
+            Covers meetings scheduled outside current availability, subject to limited
+            case-by-case availability. Paid at booking — purchase the rush fee and the
+            office will email you to arrange a time.
+          </p>
+          <a href="/services/rush-consultation" class="link-rule text-[14px]">
+            About rush consultations →
+          </a>
+        </div>
+
+        <div class="text-[13px] leading-[1.6] text-ink-muted">
+          Prefer to talk first? Call
+          <a href={SITE.phoneHref} class="font-semibold">{SITE.phone}</a> or
+          <a href="/contact">send us a message</a>.
+        </div>
+      </aside>
+    </div>
+  </div>
+</Base>

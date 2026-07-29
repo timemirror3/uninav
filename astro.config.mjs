@@ -20,7 +20,6 @@ export default defineConfig({
     // known at build, so we never pay for a runtime transform — and prerendered
     // pages stay fully static.
     imageService: 'compile',
-    platformProxy: { enabled: true },
   }),
 
   integrations: [react(), mdx(), sitemap()],
