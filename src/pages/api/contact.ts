@@ -34,7 +34,7 @@ export const POST: APIRoute = async (context) => {
 
   const verified = await verifyTurnstile(
     parsed.data.turnstileToken,
-    env.TURNSTILE_SECRET_KEY,
+    env.TURNSTILE_SECRET,
     clientIp(context.request)
   );
   if (!verified) {

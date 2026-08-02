@@ -369,7 +369,7 @@ export default function InquiryForm({ turnstileSiteKey, phone, phoneHref }: Prop
               key={resetKey}
               siteKey={turnstileSiteKey}
               onToken={setToken}
-              action="inquiry"
+              action="turnstile-spin-v2"
             />
           </div>
         )}

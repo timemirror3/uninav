@@ -20,7 +20,7 @@ export interface Env {
   STRIPE_PRICE_ZOOM_FOLLOWUPS_5?: string;
   STRIPE_PRICE_RUSH_CONSULTATION?: string;
   RESEND_API_KEY?: string;
-  TURNSTILE_SECRET_KEY?: string;
+  TURNSTILE_SECRET?: string;
   PUBLIC_TURNSTILE_SITE_KEY?: string;
   PUBLIC_CAL_LINK?: string;
   INTERNAL_NOTIFY_EMAIL?: string;

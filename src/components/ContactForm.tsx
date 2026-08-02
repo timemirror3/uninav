@@ -190,7 +190,7 @@ export default function ContactForm({ turnstileSiteKey, phone, phoneHref }: Prop
         key={resetKey}
         siteKey={turnstileSiteKey}
         onToken={setToken}
-        action="contact"
+        action="turnstile-spin-v2"
       />
 
       <button type="submit" className="btn-primary mt-5.5 w-full py-4 text-[15px]">

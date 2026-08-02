@@ -130,7 +130,7 @@ if (wrongPrefix.length) warnings.push(`These look like Product IDs, not Price ID
 
 for (const [key, label, consequence] of [
   ['STRIPE_WEBHOOK_SECRET', 'STRIPE_WEBHOOK_SECRET     ', 'Webhook signature checks will fail — no welcome email, no internal notification.'],
-  ['TURNSTILE_SECRET_KEY', 'TURNSTILE_SECRET_KEY      ', 'siteverify fails closed — every form submission is rejected.'],
+  ['TURNSTILE_SECRET', 'TURNSTILE_SECRET          ', 'siteverify fails closed — every form submission is rejected.'],
   // (test-key detection for the secret half happens just below)
   ['RESEND_API_KEY', 'RESEND_API_KEY            ', 'No email is delivered at all (forms return 502; purchase emails silently skipped).'],
 ]) {
@@ -140,7 +140,7 @@ for (const [key, label, consequence] of [
   if (!ok) warnings.push(`${key} is unset. ${consequence}`);
 }
 
-const tsSecret = merged['TURNSTILE_SECRET_KEY'] ?? '';
+const tsSecret = merged['TURNSTILE_SECRET'] ?? '';
 if (tsSecret.startsWith('1x') || tsSecret.startsWith('2x') || tsSecret.startsWith('3x')) {
   warnings.push(
     `Turnstile TEST secret key detected (${tsSecret.slice(0, 4)}…). ${tsSecret.startsWith('2x') ? 'This one ALWAYS FAILS — every submission will be rejected.' : 'This one always passes.'}`

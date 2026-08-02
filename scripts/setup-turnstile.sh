@@ -66,7 +66,7 @@ print("   .env updated")
 PY
 
 echo "→ 4/5  Uploading secret to the Worker…"
-printf '%s' "$SECRET" | npx wrangler secret put TURNSTILE_SECRET_KEY
+printf '%s' "$SECRET" | npx wrangler secret put TURNSTILE_SECRET
 
 echo "→ 5/5  Building and deploying…"
 npm run deploy

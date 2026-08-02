@@ -40,12 +40,12 @@ INTERNAL_NOTIFY_EMAIL="info@universitynavigator.org"
 
 # --- Turnstile ------------------------------------------------------------
 # Cloudflare dashboard → Turnstile → your widget.
-TURNSTILE_SECRET_KEY="0x_replace_me"
+TURNSTILE_SECRET="0x_replace_me"
 PUBLIC_TURNSTILE_SITE_KEY="0x_replace_me"
 
 # Cloudflare's always-pass test pair, handy for local work:
 #   PUBLIC_TURNSTILE_SITE_KEY="1x00000000000000000000AA"
-#   TURNSTILE_SECRET_KEY="1x0000000000000000000000000000000AA"
+#   TURNSTILE_SECRET="1x0000000000000000000000000000000AA"
 
 # --- cal.com --------------------------------------------------------------
 # The path after cal.com/ for the free consultation event type.

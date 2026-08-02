@@ -22,13 +22,15 @@ export async function verifyTurnstile(
 ): Promise<boolean> {
   if (!secret || !token) return false;
 
-  const body = new FormData();
-  body.append('secret', secret);
-  body.append('response', token);
-  if (remoteIp) body.append('remoteip', remoteIp);
+  const body = new URLSearchParams({ secret, response: token });
+  if (remoteIp) body.set('remoteip', remoteIp);
 
   try {
-    const response = await fetch(SITEVERIFY_URL, { method: 'POST', body });
+    const response = await fetch(SITEVERIFY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body,
+    });
     if (!response.ok) return false;
     const result = (await response.json()) as SiteverifyResponse;
     return result.success === true;

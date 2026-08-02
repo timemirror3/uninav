@@ -91,7 +91,7 @@ export default function NewsletterForm({ turnstileSiteKey }: Props) {
             siteKey={turnstileSiteKey}
             onToken={setToken}
             theme="dark"
-            action="newsletter"
+            action="turnstile-spin-v2"
           />
         </form>
       ) : null}

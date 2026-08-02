@@ -117,7 +117,7 @@ work — **`.dev.vars` is git-ignored and must stay that way.**
 | `RESEND_API_KEY` | `re_…` |
 | `FROM_EMAIL` | Verified sending identity on the Resend domain |
 | `INTERNAL_NOTIFY_EMAIL` | Where purchase + form notifications land. Defaults to `info@universitynavigator.org` |
-| `TURNSTILE_SECRET_KEY` | Turnstile server key |
+| `TURNSTILE_SECRET` | Turnstile server key |
 | `PUBLIC_TURNSTILE_SITE_KEY` | Turnstile client key (public by design) |
 | `PUBLIC_CAL_LINK` | e.g. `universitynavigator/free-consultation` |
 | `RUSH_RESPONSE_HOURS` | Rush response commitment in hours. Defaults to `24` |
@@ -131,7 +131,7 @@ meant to be visible. Everything else is server-only.
 npx wrangler secret put STRIPE_SECRET_KEY
 npx wrangler secret put STRIPE_WEBHOOK_SECRET
 npx wrangler secret put RESEND_API_KEY
-npx wrangler secret put TURNSTILE_SECRET_KEY
+npx wrangler secret put TURNSTILE_SECRET
 # …and each STRIPE_PRICE_*, STRIPE_PORTAL_URL, INTERNAL_NOTIFY_EMAIL, FROM_EMAIL
 ```
 
@@ -357,9 +357,9 @@ Cloudflare's test keys are handy locally:
 ```
 # always passes
 PUBLIC_TURNSTILE_SITE_KEY="1x00000000000000000000AA"
-TURNSTILE_SECRET_KEY="1x0000000000000000000000000000000AA"
+TURNSTILE_SECRET="1x0000000000000000000000000000000AA"
 # always fails — use to check the error states
-TURNSTILE_SECRET_KEY="2x0000000000000000000000000000000AA"
+TURNSTILE_SECRET="2x0000000000000000000000000000000AA"
 ```
 
 **Resend** delivers everything. Verify the sending domain first, or messages will
@@ -437,7 +437,7 @@ Create a widget in the Cloudflare dashboard with your `workers.dev` hostname (an
 later the real domain) in its allowed hostnames.
 
 ```bash
-npx wrangler secret put TURNSTILE_SECRET_KEY
+npx wrangler secret put TURNSTILE_SECRET
 ```
 
 `PUBLIC_TURNSTILE_SITE_KEY` is **build-time** — put it in `.dev.vars` (or `.env`)
