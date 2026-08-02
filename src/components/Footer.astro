@@ -7,7 +7,10 @@ import { FOOTER_EXPLORE, LEGAL_DISCLAIMER, POLICY_LINKS, SITE } from '../lib/sit
 const turnstileSiteKey = import.meta.env['PUBLIC_TURNSTILE_SITE_KEY'] ?? '';
 ---
 
-<footer class="mt-18 bg-maroon-deep">
+{/* No top margin: the space above the footer belongs to the page's last
+    section, so a full-bleed band (about) can run straight into it while a
+    padded section keeps its own breathing room. */}
+<footer class="bg-maroon-deep">
   <div
     class="mx-auto grid max-w-[1240px] grid-cols-1 gap-10 px-5 pt-16 sm:grid-cols-2 sm:px-8 lg:grid-cols-[1.3fr_1fr_1fr_1.4fr] lg:gap-12 lg:px-12"
   >

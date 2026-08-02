@@ -187,6 +187,20 @@
     font-family: var(--font-sans);
     color: var(--color-ink);
     text-rendering: optimizeLegibility;
+
+    /* Sticky footer. Short routes (404, thank-you) and any page viewed on a
+       tall or zoomed-out viewport would otherwise end mid-screen, leaving a
+       band of cream below the footer. The column stretches <main> to fill
+       whatever is left so the footer always lands on the bottom edge.
+       dvh tracks the mobile URL bar; the vh line is the fallback. */
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  main {
+    flex: 1 0 auto;
   }
 
   /* Tailwind's preflight sets `text-decoration: inherit` on anchors, which
