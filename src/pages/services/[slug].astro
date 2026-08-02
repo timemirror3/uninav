@@ -2,7 +2,6 @@
 import type { GetStaticPaths } from 'astro';
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import DraftFlag from '../../components/DraftFlag.astro';
 import RefundPolicyBlock from '../../components/RefundPolicyBlock.astro';
 import PurchaseRail from '../../components/PurchaseRail.tsx';
 import { PRODUCTS } from '../../lib/products';
@@ -75,7 +74,7 @@ const jsonLd = [
 
         {/* Optional extra prose from the MDX body. */}
         <div class="prose-uni mt-8 empty:hidden">
-          <Content components={{ DraftFlag }} />
+          <Content />
         </div>
 
         {

@@ -1,7 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
 import InquiryForm from '../components/InquiryForm.tsx';
-import DraftFlag from '../components/DraftFlag.astro';
 import { SITE } from '../lib/site';
 import { breadcrumbs } from '../lib/jsonld';
 
@@ -27,7 +26,7 @@ const jsonLd = [
     <h1 class="mb-4.5 font-serif text-[clamp(30px,6vw,44px)] text-maroon">
       Tell us about the student
     </h1>
-    <p class="mb-2 text-[15px] leading-[1.65] text-ink-soft">
+    <p class="mb-9 text-[15px] leading-[1.65] text-ink-soft">
       We use this information only to prepare for your consultation and respond to your
       inquiry. It is never sold or shared. Most fields beyond your name and email are
       optional.
@@ -37,12 +36,6 @@ const jsonLd = [
       favour of city/state. The client chose to ship as designed, so the fields
       stay. Recorded in CONTENT-REVIEW.md.
     */}
-    <p class="mb-9 text-[12px]">
-      <DraftFlag
-        type="recommendation"
-        note="drop street address at inquiry stage — city/state suffices. Kept optional here pending your call."
-      />
-    </p>
 
     <InquiryForm
       client:load

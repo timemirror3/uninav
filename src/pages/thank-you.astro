@@ -1,7 +1,6 @@
 ---
 import type Stripe from 'stripe';
 import Base from '../layouts/Base.astro';
-import DraftFlag from '../components/DraftFlag.astro';
 import { getEnv } from '../lib/env';
 import { stripeClient, formatAmount } from '../lib/stripe';
 import { getProduct, rushResponseHours } from '../lib/products';
@@ -117,9 +116,6 @@ const nextSteps: Step[] = isRush
                 </li>
               ))}
             </ol>
-            <p class="mt-3.5 text-[11px]">
-              <DraftFlag />
-            </p>
           </div>
 
           <a href="/" class="link-rule text-[15px]">Back to home</a>

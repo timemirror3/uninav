@@ -5,7 +5,6 @@ import Base from '../layouts/Base.astro';
 import HeroRoute from '../components/HeroRoute.astro';
 import Globe from '../components/Globe.tsx';
 import CampusTiles from '../components/CampusTiles.astro';
-import DraftFlag from '../components/DraftFlag.astro';
 import crest from '../assets/crest-logo.png';
 import founder from '../assets/founder-sam-atherton.png';
 import { SITE } from '../lib/site';
@@ -93,7 +92,7 @@ const jsonLd = [professionalService(), founderPerson(), servicesItemList()];
         class="motion-safe:animate-rise mt-7 text-[12px] text-ink-muted"
         style="animation-delay:.7s"
       >
-        30 minutes, free, no obligation. <DraftFlag />
+        30 minutes, free, no obligation.
       </p>
     </div>
 
@@ -258,14 +257,11 @@ const jsonLd = [professionalService(), founderPerson(), servicesItemList()];
         <h2 class="mb-4 font-serif text-[clamp(26px,5vw,36px)] text-maroon">
           Sam Atherton — Founder and President
         </h2>
-        <p class="mb-3 max-w-[58ch] text-[16px] leading-[1.65] sm:text-[17px]">
+        <p class="mb-6 max-w-[58ch] text-[16px] leading-[1.65] sm:text-[17px]">
           Sam Atherton provides professional educational consulting to students and
           families navigating the college admissions process — a professor at Mt. San
           Antonio College and a USC recruiter, with degrees from USC, UC Berkeley, and
           graduate studies at Harvard.
-        </p>
-        <p class="mb-6 text-[12px]">
-          <DraftFlag note="condensed from supplied bio" />
         </p>
         <a href="/about" class="link-rule text-[15px]">Full biography</a>
       </div>

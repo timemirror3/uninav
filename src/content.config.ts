@@ -4,10 +4,10 @@ import { glob } from 'astro/loaders';
 /**
  * Content lives in MDX so the owner can edit copy without touching components.
  *
- * `needsReview` marks entries that still carry [DRAFT COPY — REVIEW] or
- * [RECOMMENDATION: …] markers from the prototype. The markers themselves render
- * only when `import.meta.env.DEV` is true — see src/components/DraftFlag.astro —
- * and every flagged passage is catalogued in CONTENT-REVIEW.md.
+ * The copy was signed off by the owner on 2026-08-02, at which point the
+ * [DRAFT COPY — REVIEW] markers and their `needsReview` frontmatter flag were
+ * removed. CONTENT-REVIEW.md still tracks the open legal and compliance items,
+ * which are not copy questions.
  */
 
 const services = defineCollection({
@@ -53,7 +53,6 @@ const services = defineCollection({
      */
     responseHours: z.number().optional(),
     seoDescription: z.string(),
-    needsReview: z.boolean().default(false),
   }),
 });
 
@@ -66,7 +65,6 @@ const policies = defineCollection({
     seoDescription: z.string(),
     /** Renders the "ON THIS PAGE" list in the sidebar (scope page only). */
     tableOfContents: z.array(z.string()).default([]),
-    needsReview: z.boolean().default(false),
   }),
 });
 

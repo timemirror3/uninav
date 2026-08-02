@@ -2,7 +2,6 @@
 import type { GetStaticPaths } from 'astro';
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import DraftFlag from '../../components/DraftFlag.astro';
 import { POLICY_LINKS } from '../../lib/site';
 import { breadcrumbs } from '../../lib/jsonld';
 
@@ -77,7 +76,7 @@ const jsonLd = [
         {entry.data.title}
       </h1>
       <div class="prose-uni">
-        <Content components={{ DraftFlag }} />
+        <Content />
       </div>
     </article>
   </div>
