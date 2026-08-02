@@ -1,6 +1,9 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "university-navigator",
+  // Must match the deployed Worker. Cloudflare Workers Builds deploys this repo
+  // as "uninav"; a mismatch here silently sends `npm run deploy` to a second,
+  // empty Worker that has none of the production secrets bound to it.
+  "name": "uninav",
 
   // The adapter supplies the Worker entrypoint; Astro's build wires the compiled
   // server bundle in behind it. Do not point this at a path inside dist/ — the
