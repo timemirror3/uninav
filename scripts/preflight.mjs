@@ -23,6 +23,23 @@ const DIM = '\x1b[2m';
 const BOLD = '\x1b[1m';
 const OFF = '\x1b[0m';
 
+/**
+ * Strip surrounding quotes and any trailing `# comment`.
+ *
+ * The comment matters: .dev.vars annotates most values (`STRIPE_PRICE_ESSAY_REVIEW=
+ * "price_…"  # $300.00 one-time`). A naive endsWith('"') check never fires on those
+ * lines, so the closing quote stays attached and every prefix test below silently
+ * fails — which read as "these are Product IDs, not Price IDs" against IDs that
+ * were perfectly correct.
+ */
+function unquote(value) {
+  const quoted = /^(['"])([\s\S]*?)\1\s*(?:#.*)?$/.exec(value);
+  if (quoted) return quoted[2];
+  // Unquoted: a comment only starts at whitespace-then-#, so URLs with a
+  // fragment (https://…#foo) survive intact.
+  return value.split(/\s+#/)[0].trim();
+}
+
 function parseEnvFile(path) {
   if (!existsSync(path)) return null;
   const out = {};
@@ -32,14 +49,7 @@ function parseEnvFile(path) {
     const eq = trimmed.indexOf('=');
     if (eq === -1) continue;
     const key = trimmed.slice(0, eq).trim();
-    let value = trimmed.slice(eq + 1).trim();
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1);
-    }
-    out[key] = value;
+    out[key] = unquote(trimmed.slice(eq + 1).trim());
   }
   return out;
 }
