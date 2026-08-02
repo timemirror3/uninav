@@ -10,7 +10,8 @@
     "check": "astro check",
     "deploy": "npm run build && wrangler deploy",
     "cf-typegen": "wrangler types",
-    "preflight": "node scripts/preflight.mjs"
+    "preflight": "node scripts/preflight.mjs",
+    "seed:stripe": "node scripts/seed-stripe.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.1.6",
