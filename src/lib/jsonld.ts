@@ -20,7 +20,7 @@ export function professionalService() {
     description: SITE.description,
     slogan: SITE.tagline,
     email: SITE.email,
-    telephone: '+1-424-404-3686',
+    telephone: '+1-949-209-9962',
     priceRange: '$$$',
     areaServed: [
       { '@type': 'AdministrativeArea', name: 'Southern California' },

@@ -78,8 +78,11 @@ Two of these are easy to get wrong and silent when you do:
 ## 2. Live Stripe Prices — create by hand
 
 `scripts/seed-stripe.mjs` **deliberately refuses live keys**; seeding is a test
-operation. Create these five in the live Dashboard, matching
-`src/lib/products.ts` exactly. A mismatch between the displayed price and the
+operation. Its live counterpart is `npm run setup:stripe-live` — a dry run by
+default, `--apply` to create these five Prices (idempotent via `lookup_key`),
+create the live webhook endpoint, write both into `.dev.vars`, and upload the
+seven `STRIPE_*` secrets to the Worker. Or create them in the Dashboard by hand,
+matching `src/lib/products.ts` exactly. A mismatch between the displayed price and the
 Price object is a consumer-protection problem, not a cosmetic one.
 
 | Product | Amount | Billing |
@@ -96,9 +99,11 @@ sparse, which reads as low-trust on a $2,750 recurring purchase.
 ## 3. Deploy
 
 - [ ] `npx wrangler secret put …` for every variable in §1.
-- [ ] **Pick the right Cloudflare account** — the CLI is authenticated against
-      four. This project belongs to `Andreslopez.23061@gmail.com's Account`
-      (`0bda3a2560ca48711ef7336cc421abed`).
+- [x] **Pick the right Cloudflare account** — the CLI is authenticated against
+      four. The deployed `uninav` Worker lives in
+      `Michaeloberteicher@gmail.com's Account` (`0df6a139f9d0c5f70168e045d6da7b32`),
+      now pinned as `account_id` in `wrangler.jsonc`. (An earlier version of this
+      note named the andreslopez account — no `uninav` Worker exists there.)
 - [ ] Create the live webhook endpoint at
       `POST https://universitynavigator.org/api/stripe-webhook`, subscribed to
       `checkout.session.completed`, and copy **that endpoint's** signing secret.
@@ -130,7 +135,7 @@ California's ARL cares about most.
 | Icon + logo | the crest in `public/` |
 | Brand colour | `#560f10` |
 | Accent colour | `#d8a13a` |
-| Support email / phone / website | `info@universitynavigator.org` / `(424) 404-3686` / the live domain |
+| Support email / phone / website | `info@universitynavigator.org` / `(949) 209-9962` / the live domain |
 
 Set these on the **live** account. Branding is per-account and does not carry
 over from the sandbox.

@@ -293,11 +293,11 @@ disclaimer + © line. Mobile overlay: `#38090D` full-screen, 44px serif links wi
 |---|---|---|
 | Contact | pending | "Sending…" / "Your message is on its way." |
 | | success | ✓ "Message sent" / "Thank you — we'll reply within one business day." / "Send another message" |
-| | error | ! "That didn't go through" / "Your message wasn't sent. Please try again — or call us directly at (424) 404-3686." / "Try again" |
+| | error | ! "That didn't go through" / "Your message wasn't sent. Please try again — or call us directly at (949) 209-9962." / "Try again" |
 | Newsletter | pending | "Subscribing…" |
 | | success | "✓ Subscribed — welcome aboard." |
 | | error | "That didn't go through — try again or email us directly." |
-| Inquiry | success | ✓ "Inquiry received" / "Thank you — we'll review your information and reply within one business day. If anything is time-sensitive, call us at (424) 404-3686." / CTA "Book your free consultation" |
+| Inquiry | success | ✓ "Inquiry received" / "Thank you — we'll review your information and reply within one business day. If anything is time-sensitive, call us at (949) 209-9962." / CTA "Book your free consultation" |
 
 Every error state surfaces the phone number. Status changes announced via `aria-live`.
 Inquiry answers persist across step navigation **and reload** (`sessionStorage`,
@@ -393,4 +393,4 @@ JS ships only for islands: compass, mobile nav, cal embed, 3 forms, ack gate.
 
 ## 13. Contact
 
-`info@universitynavigator.org` · (424) 404-3686 · © 2026 University Navigator, Inc.
+`info@universitynavigator.org` · (949) 209-9962 · © 2026 University Navigator, Inc.

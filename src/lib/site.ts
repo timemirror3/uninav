@@ -8,8 +8,8 @@ export const SITE = {
   description:
     'Independent college admissions consulting in Southern California. From first draft to acceptance letter, we help students see not just where they can go, but who they can become.',
   email: 'info@universitynavigator.org',
-  phone: '(424) 404-3686',
-  phoneHref: 'tel:+14244043686',
+  phone: '(949) 209-9962',
+  phoneHref: 'tel:+19492099962',
   region: 'Southern California',
   founded: '2026',
 } as const;

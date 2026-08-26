@@ -5,6 +5,12 @@
   // empty Worker that has none of the production secrets bound to it.
   "name": "uninav",
 
+  // The CLI is authenticated against four accounts. The deployed "uninav" Worker
+  // lives in this one (Michaeloberteicher@gmail.com's Account) — NOT the
+  // andreslopez account. Without this, every `wrangler secret put` aborts with
+  // "More than one account available".
+  "account_id": "0df6a139f9d0c5f70168e045d6da7b32",
+
   // The adapter supplies the Worker entrypoint; Astro's build wires the compiled
   // server bundle in behind it. Do not point this at a path inside dist/ — the
   // Cloudflare Vite plugin resolves `main` before the build has produced anything.

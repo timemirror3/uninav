@@ -54,8 +54,8 @@ export default function NewsletterForm({ turnstileSiteKey }: Props) {
     return (
       <FormUnavailable
         variant="inline"
-        phone="(424) 404-3686"
-        phoneHref="tel:+14244043686"
+        phone="(949) 209-9962"
+        phoneHref="tel:+19492099962"
         email="info@universitynavigator.org"
       />
     );
