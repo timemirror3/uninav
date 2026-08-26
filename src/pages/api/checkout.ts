@@ -162,7 +162,14 @@ function fail(request: Request, reason: string, slug = ''): Response {
       headers: { 'content-type': 'application/json', 'cache-control': 'no-store' },
     });
   }
-  const target = slug ? `/services/${slug}?error=${reason}` : `/services?error=${reason}`;
+  // A testOnly product (the footer hot dog) has no /services/<slug> page, and an
+  // unknown slug never did — either would 404. Send both to a page that exists.
+  const product = slug ? PRODUCTS[slug as keyof typeof PRODUCTS] : undefined;
+  const target = product
+    ? product.testOnly
+      ? `/?error=${reason}`
+      : `/services/${slug}?error=${reason}`
+    : `/services?error=${reason}`;
   return new Response(null, {
     status: 303,
     headers: { location: target, 'cache-control': 'no-store' },

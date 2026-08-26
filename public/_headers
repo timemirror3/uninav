@@ -7,7 +7,7 @@
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
   Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), interest-cohort=()
   Cross-Origin-Opener-Policy: same-origin
-  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' https://checkout.stripe.com; img-src 'self' data: https://cal.com https://app.cal.com; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://app.cal.com https://cal.com; frame-src https://challenges.cloudflare.com https://app.cal.com https://cal.com https://checkout.stripe.com; connect-src 'self' https://api.cal.com https://app.cal.com https://cal.com; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self' https://checkout.stripe.com; img-src 'self' data: https://cal.com https://app.cal.com; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://app.cal.com https://cal.com https://static.cloudflareinsights.com; frame-src https://challenges.cloudflare.com https://app.cal.com https://cal.com https://checkout.stripe.com; connect-src 'self' https://api.cal.com https://app.cal.com https://cal.com https://cloudflareinsights.com; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests
 
 # Fonts are content-hashed by filename only when emitted by the build; these are
 # stable public files, so cache them hard and rely on the filename never changing.
