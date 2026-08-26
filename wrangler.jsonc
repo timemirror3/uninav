@@ -18,8 +18,20 @@
 
   "compatibility_date": "2026-07-28",
 
-  // Required by the Stripe SDK, which reaches for Node built-ins.
-  "compatibility_flags": ["nodejs_compat"],
+  // nodejs_compat: required by the Stripe SDK (reaches for Node built-ins).
+  //
+  // assets_navigation_has_no_effect: disables Cloudflare's 2025-04-01 default
+  // "navigation requests prefer asset serving". WITHOUT this flag, a real browser
+  // navigation (Sec-Fetch-Mode: navigate) to a path with no matching static file
+  // is answered by the asset layer's 404 page and the Worker never runs — which
+  // silently broke every server route for browsers while curl kept working:
+  //   • the purchase rail's `POST /api/checkout` returned 405 (assets reject POST)
+  //   • Stripe's success_url `GET /thank-you` rendered "Page not found"
+  //   • Stripe webhook POSTs would have been dropped the same way
+  // The flag restores pre-2025 behavior: unmatched requests fall through to the
+  // Worker (Astro SSR), which serves /thank-you, the API routes, and its own 404.
+  // Static marketing pages still match real files and are served asset-first.
+  "compatibility_flags": ["nodejs_compat", "assets_navigation_has_no_effect"],
 
   "assets": {
     "directory": "./dist/client",
