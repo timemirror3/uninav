@@ -65,6 +65,13 @@ const CATALOG = [
     description: 'Rush consultation — scheduled outside current availability.',
     amount: 10000,
   },
+  {
+    slug: 'hotdog',
+    envKey: 'STRIPE_PRICE_HOTDOG',
+    name: 'Hot dog (live payment test)',
+    description: 'A $1.00 live payment test. No hot dog is shipped; refund on request.',
+    amount: 100,
+  },
 ];
 
 /* ------------------------------------------------------------ read the key */

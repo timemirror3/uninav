@@ -131,10 +131,11 @@ const priceVars = [
   'STRIPE_PRICE_ESSAY_REVIEWS_5',
   'STRIPE_PRICE_ZOOM_FOLLOWUPS_5',
   'STRIPE_PRICE_RUSH_CONSULTATION',
+  'STRIPE_PRICE_HOTDOG',
 ];
 const unsetPrices = priceVars.filter((k) => !merged[k] || merged[k].includes('replace_me'));
 const wrongPrefix = priceVars.filter((k) => merged[k] && !merged[k].includes('replace_me') && !merged[k].startsWith('price_'));
-console.log(`  STRIPE_PRICE_* (5)         ${unsetPrices.length === 0 ? GREEN + 'all set' : YELLOW + `${5 - unsetPrices.length}/5 set`}${OFF}`);
+console.log(`  STRIPE_PRICE_* (${priceVars.length})         ${unsetPrices.length === 0 ? GREEN + 'all set' : YELLOW + `${priceVars.length - unsetPrices.length}/${priceVars.length} set`}${OFF}`);
 if (unsetPrices.length) warnings.push(`Unset or placeholder Price IDs: ${unsetPrices.join(', ')}. Those products cannot be purchased.`);
 if (wrongPrefix.length) warnings.push(`These look like Product IDs, not Price IDs (must start with "price_"): ${wrongPrefix.join(', ')}.`);
 

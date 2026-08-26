@@ -14,7 +14,8 @@ export type ProductSlug =
   | 'essay-review'
   | 'essay-reviews-5'
   | 'zoom-followups-5'
-  | 'rush-consultation';
+  | 'rush-consultation'
+  | 'hotdog';
 
 export interface Product {
   slug: ProductSlug;
@@ -45,6 +46,12 @@ export interface Product {
   allowAch: boolean;
   /** Rush carries a response clock the other products do not. */
   isRush?: boolean;
+  /**
+   * A live-payment smoke test, not a service. Kept out of the services
+   * structured data and given no product page; the footer offers it and the
+   * cancel URL falls back to the home page. Refund from the Stripe Dashboard.
+   */
+  testOnly?: boolean;
 }
 
 export const PRODUCTS: Record<ProductSlug, Product> = {
@@ -118,6 +125,21 @@ export const PRODUCTS: Record<ProductSlug, Product> = {
     mode: 'payment',
     allowAch: false,
     isRush: true,
+  },
+  hotdog: {
+    slug: 'hotdog',
+    priceEnv: 'STRIPE_PRICE_HOTDOG',
+    name: 'Hot dog (live payment test)',
+    kind: 'PAYMENT TEST',
+    price: '$1.00',
+    term: 'one-time',
+    billingNote: 'One-time $1.00 test charge via Stripe Checkout.',
+    termNote: 'One-time charge.',
+    cta: 'Buy a hot dog',
+    desc: 'A $1.00 live payment test. No hot dog is shipped; refund on request.',
+    mode: 'payment',
+    allowAch: false,
+    testOnly: true,
   },
 };
 

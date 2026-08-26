@@ -85,6 +85,16 @@ const turnstileSiteKey = import.meta.env['PUBLIC_TURNSTILE_SITE_KEY'] ?? '';
         © 2026 {SITE.name} · Campus photography licensed via Unsplash / Wikimedia Commons
         — attribution in credits · Photos are atmosphere, not a claim of affiliation.
       </div>
+      {/* Live-payment smoke test: a real $1.00 Stripe charge through the same
+          /api/checkout path as every product. Refund it from the Stripe
+          Dashboard afterwards. Remove once the launch test is done. */}
+      <form method="post" action="/api/checkout" class="text-[12px] text-cream-muted">
+        <input type="hidden" name="product" value="hotdog" />
+        <input type="hidden" name="refundAck" value="true" />
+        <button type="submit" class="cursor-pointer underline underline-offset-2 hover:text-bg">
+          🌭 Buy a hot dog · $1.00 — live payment test
+        </button>
+      </form>
     </div>
   </div>
 </footer>

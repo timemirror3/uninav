@@ -113,6 +113,7 @@ work — **`.dev.vars` is git-ignored and must stay that way.**
 | `STRIPE_PRICE_ESSAY_REVIEWS_5` | Price ID, $775.00 one-time |
 | `STRIPE_PRICE_ZOOM_FOLLOWUPS_5` | Price ID, $725.00 one-time |
 | `STRIPE_PRICE_RUSH_CONSULTATION` | Price ID, $100.00 one-time |
+| `STRIPE_PRICE_HOTDOG` | Price ID, $1.00 one-time — the footer's live-payment smoke test |
 | `STRIPE_PORTAL_URL` | Customer Portal login link. **Required for ARL compliance** |
 | `RESEND_API_KEY` | `re_…` |
 | `FROM_EMAIL` | Verified sending identity on the Resend domain |

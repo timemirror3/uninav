@@ -22,6 +22,7 @@ STRIPE_PRICE_ESSAY_REVIEW="price_replace_me"        # $300.00 one-time
 STRIPE_PRICE_ESSAY_REVIEWS_5="price_replace_me"     # $775.00 one-time
 STRIPE_PRICE_ZOOM_FOLLOWUPS_5="price_replace_me"    # $725.00 one-time
 STRIPE_PRICE_RUSH_CONSULTATION="price_replace_me"   # $100.00 one-time
+STRIPE_PRICE_HOTDOG="price_replace_me"              # $1.00 one-time — footer live-payment test
 
 # Customer Portal login link (Stripe Dashboard → Settings → Billing → Customer
 # portal → "Login link"). Included in the bundle welcome email so cancellation

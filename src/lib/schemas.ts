@@ -135,6 +135,7 @@ export const checkoutSchema = z.object({
     'essay-reviews-5',
     'zoom-followups-5',
     'rush-consultation',
+    'hotdog',
   ]),
   /** Must be true — the refund-policy gate. */
   refundAck: z.literal(true),

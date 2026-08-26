@@ -17,7 +17,7 @@
  *      Stripe only reveals the signing secret at creation time; if the endpoint
  *      already exists the .dev.vars value is kept as-is.
  *   3. Write the Price IDs (and new webhook secret) into .dev.vars.
- *   4. `wrangler secret bulk` the seven STRIPE_* values to the production Worker.
+ *   4. `wrangler secret bulk` the eight STRIPE_* values to the production Worker.
  *
  * Never prints a secret value.
  */
@@ -35,6 +35,8 @@ const CATALOG = [
   { slug: 'essay-reviews-5', envKey: 'STRIPE_PRICE_ESSAY_REVIEWS_5', name: '5 Additional Application / Essay Reviews', description: 'Five additional full essay reviews.', amount: 77500 },
   { slug: 'zoom-followups-5', envKey: 'STRIPE_PRICE_ZOOM_FOLLOWUPS_5', name: 'Five Additional Zoom Follow-Ups', description: 'Five additional Zoom sessions.', amount: 72500 },
   { slug: 'rush-consultation', envKey: 'STRIPE_PRICE_RUSH_CONSULTATION', name: 'Rush consultation fee', description: 'Rush consultation — scheduled outside current availability.', amount: 10000 },
+  // Live-payment smoke test offered in the site footer. Refund after testing.
+  { slug: 'hotdog', envKey: 'STRIPE_PRICE_HOTDOG', name: 'Hot dog (live payment test)', description: 'A $1.00 live payment test. No hot dog is shipped; refund on request.', amount: 100 },
 ];
 
 function readDevVars(path = '.dev.vars') {

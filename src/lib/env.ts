@@ -19,6 +19,7 @@ export interface Env {
   STRIPE_PRICE_ESSAY_REVIEWS_5?: string;
   STRIPE_PRICE_ZOOM_FOLLOWUPS_5?: string;
   STRIPE_PRICE_RUSH_CONSULTATION?: string;
+  STRIPE_PRICE_HOTDOG?: string;
   RESEND_API_KEY?: string;
   TURNSTILE_SECRET?: string;
   PUBLIC_TURNSTILE_SITE_KEY?: string;

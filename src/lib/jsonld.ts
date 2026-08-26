@@ -115,7 +115,9 @@ export function servicesItemList() {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: 'Services',
-    itemListElement: Object.values(PRODUCTS).map((product, index) => ({
+    itemListElement: Object.values(PRODUCTS)
+      .filter((product) => !product.testOnly)
+      .map((product, index) => ({
       '@type': 'ListItem',
       position: index + 1,
       name: product.name,

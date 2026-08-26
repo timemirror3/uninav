@@ -79,7 +79,7 @@ export const POST: APIRoute = async (context) => {
       payment_method_types: paymentMethodTypes(product.allowAch),
 
       success_url: `${origin}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/services/${product.slug}`,
+      cancel_url: product.testOnly ? `${origin}/` : `${origin}/services/${product.slug}`,
 
       billing_address_collection: 'required',
       ...(parsed.data.email ? { customer_email: parsed.data.email } : {}),
